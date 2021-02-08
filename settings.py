@@ -1,3 +1,6 @@
+# Simulation config
+TICK_LENGTH_IN_SECONDS = 1
+
 # Building config
 NUM_FLOORS = 3
 NUM_ELEVATORS = 1
@@ -7,3 +10,7 @@ FLOOR_HEIGHT = 4.0
 EPSILON = 0.05
 STEP_SIZE = 0.1
 DISCOUNT_RATE = 0.99
+
+# Elevator config
+MAX_VELOCITY=3.0
+ACCELERATION=1.0

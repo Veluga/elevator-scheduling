@@ -1,11 +1,18 @@
-import settings as s
 from .building import Building, Call, ElevatorState
 from random import randint
 
 class DiscreteFloorTransitionBuilding(Building):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-    
+        self.up_calls = {i: False for i in range(floors)}
+        self.down_calls = {i: False for i in range(floors)}
+
+    def call(self, floor, direction):
+        if direction == Call.DOWN:
+            self.down_calls[floor] = True
+        else:
+            self.up_calls[floor] = True
+
     def sample_state(self):
         # Generated calls
         up_calls = tuple(self.up_calls[i] for i in range(self.floors))

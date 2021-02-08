@@ -7,10 +7,13 @@ class ContinuousRandomCallCaller(Caller):
         super().__init__(*args, **kwargs)
 
     def generate_call(self):
-        floor = randint(0, self.floors-1)
-        if floor == 0:
-            return floor, Call.UP
-        elif floor == self.floors-1:
-            return floor, Call.DOWN
+        call_floor = randint(0, self.floors-1)
+        if call_floor == self.floors-1:
+            destination_floor = randint(0, call_floor-1)
+        elif call_floor == 0:
+            destination_floor = randint(1, self.floors-1)
         else:
-            return floor, Call.UP if random() > 0.5 else Call.DOWN
+            destination_floor = randint(0, self.floors-1)
+            while destination_floor == call_floor:
+                destination = randint(0, self.floors-1)
+        return call_floor, destination_floor
