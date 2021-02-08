@@ -1,6 +1,7 @@
 # Building config
 NUM_FLOORS = 3
 NUM_ELEVATORS = 1
+FLOOR_HEIGHT = 4.0
 
 # Agent config
 EPSILON = 0.05
