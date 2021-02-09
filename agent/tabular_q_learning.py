@@ -51,4 +51,4 @@ class TabularQLearningAgent(Agent):
         if new_state not in self.q:
             self.init_action_values(new_state)
         _, max_val = self.get_estimated_best_action(new_state)
-        self.q[(state, action)] += self.alpha * (reward + self.gamma * max_val - self.q[(state, action)])
+        self.q[(state, action)] += self.alpha * (sum(reward) + self.gamma * max_val - self.q[(state, action)])

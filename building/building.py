@@ -23,15 +23,9 @@ class Building(ABC):
         
 
 class Elevator:
-    def __init__(self, cur_velocity=0.0, cur_floor=0, max_velocity=s.MAX_VELOCITY, acceleration=s.ACCELERATION, floor_height=s.FLOOR_HEIGHT):
-        self.cur_velocity = cur_velocity
+    def __init__(self, cur_floor=0):
         self.cur_floor = cur_floor
-        self.max_velocity = max_velocity
-        self.acceleration = acceleration
-        self.floor_height = floor_height
-        self.interfloor_distance = 0.0
-        self.stopped = True
-        self.direction = ElevatorState.ASCENDING
+        self.state = ElevatorState.STOPPED
         self.buttons_pressed = set()
 
 class ElevatorState(Enum):
