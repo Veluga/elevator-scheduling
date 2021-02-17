@@ -9,7 +9,7 @@ class AverageReward(Visualization):
         self.average_rewards = []
 
     def next_reward(self, reward):
-        if len(self.reward_sliding_window) <= self.sliding_window_size:
+        if len(self.reward_sliding_window) < self.sliding_window_size:
             self.reward_sliding_window.append(sum(reward))
             self.average_rewards.append(sum(self.reward_sliding_window) / len(self.reward_sliding_window))
         else:
@@ -18,6 +18,9 @@ class AverageReward(Visualization):
             avg += sum(reward) / self.sliding_window_size
             self.reward_sliding_window.append(sum(reward))
             self.average_rewards.append(avg)
+            if len(self.average_rewards) % self.sliding_window_size == 0:
+                #print("Avg. reward: {}".format(avg))
+                pass
 
     def display(self):
         plt.plot([i for i in range(len(self.average_rewards))], self.average_rewards, 'r-')

@@ -35,6 +35,7 @@ class TabularQLearningAgent(Agent):
         self.q[state] = True
 
     def get_action(self, state):
+        state = state['up_calls'] + state['down_calls'] + state['elevators']
         if state not in self.q:
             self.init_action_values(state)
         
@@ -48,6 +49,8 @@ class TabularQLearningAgent(Agent):
             return max_action
 
     def perform_update(self, state, action, reward, new_state):
+        state = state['up_calls'] + state['down_calls'] + state['elevators']
+        new_state = new_state['up_calls'] + new_state['down_calls'] + new_state['elevators']
         if new_state not in self.q:
             self.init_action_values(new_state)
         _, max_val = self.get_estimated_best_action(new_state)

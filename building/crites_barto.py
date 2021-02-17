@@ -3,7 +3,7 @@ from .building import Building, Call, Elevator, ElevatorState
 from random import randint
 
 
-class DiscreteFloorTransition(Building):
+class CritesBartoBuilding(Building):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.reset()
@@ -45,6 +45,17 @@ class DiscreteFloorTransition(Building):
         rewards = []
         for elevator, action in zip(self.elevators, actions):
             rewards.append(0)
+            """ if (action == ElevatorState.ASCENDING and any([b <= elevator.cur_floor for b in elevator.buttons_pressed])) \
+            or (action == ElevatorState.DESCENDING and any([b >= elevator.cur_floor for b in elevator.buttons_pressed])):
+                rewards[-1] += -1
+                continue """
+
+            """ if action == ElevatorState.STOPPED \
+            and (elevator.cur_floor not in elevator.buttons_pressed) \
+            and (len(self.up_calls[elevator.cur_floor]) == 0 and len(self.down_calls[elevator.cur_floor]) == 0):
+                rewards[-1] += -1
+                continue """
+
             rewards[-1] += update_position(elevator, action)
             elevator.state = action
             
@@ -72,20 +83,5 @@ class DiscreteFloorTransition(Building):
         return rewards
     
     def _reset(self):
-        def random_call_destinations(floor_num):
-            if floor_num == self.floors-1:
-                destination_floor = randint(0, floor_num-1)
-                return set([destination_floor])
-            elif floor_num == 0:
-                destination_floor = randint(1, self.floors-1)
-                return set([destination_floor])
-            else:
-                destination_floor = randint(0, self.floors-1)
-                while destination_floor == floor_num:
-                    destination_floor = randint(0, self.floors-1)
-                return set([destination_floor])
-
-        #self.up_calls = {floor_num: random_call_destinations(floor_num) for floor_num in range(self.floors)}
-        #self.down_calls = {floor_num: random_call_destinations(floor_num) for floor_num in range(self.floors)}
         self.up_calls = {floor_num: set() for floor_num in range(self.floors)}
         self.down_calls = {floor_num: set() for floor_num in range(self.floors)}
