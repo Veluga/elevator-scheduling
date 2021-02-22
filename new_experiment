@@ -17,6 +17,7 @@ cp -r caller "$DIRNAME"
 cp settings.py "$DIRNAME"
 
 mkdir "${DIRNAME}/weights"
+mkdir "${DIRNAME}/plots"
 touch "${DIRNAME}/model_log.txt"
 
 vim "${DIRNAME}/settings.py"

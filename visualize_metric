@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [[ -z "$1" ]]; then
+    echo "Require metric name."
+    echo "Available choices are loss, waiting_passengers, boarded_passengers, avg_return."
+    exit 1
+fi
+
+LATEST=$(ls -t experiments | head -n1)
+cat experiments/"$LATEST"/model_log.txt | grep "$1" | python visualization/show_metric.py "$1"
