@@ -30,13 +30,15 @@ class Building(ABC):
     def _reset(self):
         pass
 
-class Elevator:
-    def __init__(self, cur_floor=0):
-        self.cur_floor = cur_floor
-        self.state = ElevatorState.STOPPED
-        self.buttons_pressed = set()
-
 class ElevatorState(IntEnum):
     STOPPED = 0
     ASCENDING = 1
     DESCENDING = 2
+
+
+class Elevator:
+    def __init__(self, cur_floor=0, direction=ElevatorState.ASCENDING):
+        self.cur_floor = cur_floor
+        self.state = ElevatorState.STOPPED
+        self.buttons_pressed = set()
+        self.direction = direction

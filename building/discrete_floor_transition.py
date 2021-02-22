@@ -1,7 +1,7 @@
 import settings as s
 from .building import Building, Call, Elevator, ElevatorState
 from random import randint
-
+import numpy as np
 
 class DiscreteFloorTransition(Building):
     def __init__(self, *args, **kwargs):
@@ -15,32 +15,34 @@ class DiscreteFloorTransition(Building):
             self.down_calls[call_floor].add(destination_floor)
 
     def sample_state(self):
-        up_calls = tuple([len(s) > 0 for f, s in self.up_calls.items()])
-        down_calls = tuple([len(s) > 0 for f, s in self.down_calls.items()])
-        elevators = tuple(
-            tuple([e.cur_floor, e.state, tuple([f in e.buttons_pressed for f in range(self.floors)])]) 
-            for e in self.elevators
-        )
-        return {"up_calls": up_calls, "down_calls": down_calls, "elevators": elevators}
+        np_up_calls = np.array([[len(s) > 0 for f, s in self.up_calls.items()]], dtype=int)
+        np_down_calls = np.array([[len(s) > 0 for f, s in self.down_calls.items()]], dtype=int)
+        np_state_vector = np.append(np_up_calls, np_down_calls)
+        for e in self.elevators:
+            np_state_vector = np.append(np_state_vector, [e.cur_floor])
+            np_state_vector = np.append(np_state_vector, [s == e.state for s in range(min(ElevatorState).value, max(ElevatorState).value+1)])
+            np_state_vector = np.append(np_state_vector, [f in e.buttons_pressed for f in range(self.floors)])
+        return np_state_vector, {'up_calls': self.up_calls, 'down_calls': self.down_calls, 'elevators': self.elevators}
 
     def perform_action(self, actions):
-        from_, to = self.caller.generate_call()
-        if from_ is not None and to is not None:
-            self.call(from_, to)
-        
-        actions = [actions]
         def update_position(elevator, action):
             if action == ElevatorState.ASCENDING:
                 if elevator.cur_floor != self.floors-1:
                     elevator.cur_floor += 1
+                    elevator.direction = ElevatorState.ASCENDING
                 else:
                     return -1
             elif action == ElevatorState.DESCENDING:
                 if elevator.cur_floor != 0:
                     elevator.cur_floor -= 1
+                    elevator.direction = ElevatorState.DESCENDING
                 else:
                     return -1
             return 0
+        
+        from_, to = self.caller.generate_call()
+        if from_ is not None and to is not None:
+            self.call(from_, to)
 
         rewards = []
         for elevator, action in zip(self.elevators, actions):
@@ -72,20 +74,5 @@ class DiscreteFloorTransition(Building):
         return rewards
     
     def _reset(self):
-        def random_call_destinations(floor_num):
-            if floor_num == self.floors-1:
-                destination_floor = randint(0, floor_num-1)
-                return set([destination_floor])
-            elif floor_num == 0:
-                destination_floor = randint(1, self.floors-1)
-                return set([destination_floor])
-            else:
-                destination_floor = randint(0, self.floors-1)
-                while destination_floor == floor_num:
-                    destination_floor = randint(0, self.floors-1)
-                return set([destination_floor])
-
-        #self.up_calls = {floor_num: random_call_destinations(floor_num) for floor_num in range(self.floors)}
-        #self.down_calls = {floor_num: random_call_destinations(floor_num) for floor_num in range(self.floors)}
         self.up_calls = {floor_num: set() for floor_num in range(self.floors)}
         self.down_calls = {floor_num: set() for floor_num in range(self.floors)}

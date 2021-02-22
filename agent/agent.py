@@ -1,9 +1,8 @@
-#import settings as s
 from abc import ABC, abstractmethod
+import settings as s
 
 class Agent(ABC):
-    #def __init__(self, elevators=s.NUM_ELEVATORS):
-    def __init__(self, elevators=3):
+    def __init__(self, elevators=s.NUM_ELEVATORS):
         self.elevators = elevators
 
     @abstractmethod

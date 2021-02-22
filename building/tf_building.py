@@ -20,21 +20,20 @@ class TFBuilding(py_environment.PyEnvironment):
         self._timestep = 0
         self._episode_ended = False
         self._rewards = 0
+        self._state = self._sample_state()
         # Tensorflow init
         self._action_spec = array_spec.BoundedArraySpec(
             shape=(),
             dtype=np.int32,
             minimum=0,
-            maximum=max(self.available_actions).value,
+            maximum=len(self.available_actions)-1,
             name='action'
         )
-        # Up/Down Calls + Elevator Floor/State + Buttons Pressed
         self._observation_spec = array_spec.ArraySpec(
-            shape=self._sample_state().shape,
+            shape=self._state.shape,
             dtype=np.int32,
             name='observation'
         )
-        self._state = self._sample_state()
 
     def action_spec(self):
         return self._action_spec
@@ -43,14 +42,7 @@ class TFBuilding(py_environment.PyEnvironment):
         return self._observation_spec
 
     def _sample_state(self):
-        state = self.building.sample_state()
-        up_calls = np.array([state["up_calls"]], dtype=int)
-        down_calls = np.array([state["down_calls"]], dtype=int)
-        state_vector = np.append(up_calls, down_calls)
-        for cur_floor, elevator_state, buttons_pressed in state["elevators"]:
-            state_vector = np.append(state_vector, np.array([cur_floor], dtype=int))
-            state_vector = np.append(state_vector, np.array([elevator_state], dtype=int))
-            state_vector = np.append(state_vector, buttons_pressed)
+        state_vector, _ = self.building.sample_state()
         return state_vector
 
     def _reset(self):
@@ -61,7 +53,7 @@ class TFBuilding(py_environment.PyEnvironment):
         self._state = self._sample_state()
         return ts.restart(np.array(self._state, dtype=np.int32))
 
-    def _step(self, action):
+    def _step(self, action_idx):
         if self._episode_ended:
             return self._reset()
 
@@ -70,10 +62,10 @@ class TFBuilding(py_environment.PyEnvironment):
         """ if self._timestep % int(sqrt(1000)) == 0:
             print("Time {}/{}".format(self._timestep, 1000)) """
 
-        reward = sum(self.building.perform_action(action))
+        reward = sum(self.building.perform_action(self.available_actions[action_idx]))
 
         self._state = self._sample_state()
-        if self._timestep >= 3600:
+        if self._timestep >= s.EPISODE_LENGTH:
             self._episode_ended = True
             return ts.termination(
                 np.array(self._state, dtype=np.int32),
@@ -83,5 +75,5 @@ class TFBuilding(py_environment.PyEnvironment):
             return ts.transition(
                 np.array(self._state, dtype=np.int32),
                 reward=reward,
-                discount=0.99
+                discount=s.DISCOUNT_RATE
             )
