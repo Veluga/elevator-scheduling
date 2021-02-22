@@ -143,7 +143,7 @@ if __name__ == '__main__':
             step = agent.train_step_counter.numpy()
 
             if step % s.LOG_INTERVAL == 0:
-                env = train_tf_building.envs[0].building
+                env = train_env.envs[0].building
                 waiting_passengers = sum([len(env.up_calls[f]) + len(env.down_calls[f]) for f in range(env.floors)])
                 boarded_passengers = sum([len(e.buttons_pressed) for e in env.elevators])
                 print('{{"metric": "loss", "value": {}, "step": {}}}'.format(train_loss, step))
