@@ -11,5 +11,6 @@ class CumulativeReward(Visualization):
         self.cumulative_rewards.append(self.cumulative_reward)
 
     def display(self):
-        plt.plot([i for i in range(len(self.cumulative_rewards))], self.cumulative_rewards, 'r-')
-        plt.show()
+        print(self.cumulative_reward)
+        """ plt.plot(range(len(self.cumulative_rewards)), self.cumulative_rewards, 'r-')
+        plt.show() """

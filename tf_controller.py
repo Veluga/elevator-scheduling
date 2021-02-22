@@ -2,6 +2,7 @@ from building.tf_building import TFBuilding
 from building.building import ElevatorState
 from building.discrete_floor_transition import DiscreteFloorTransition
 from caller.continuous_random_call import ContinuousRandomCallCaller
+from caller.up_peak_caller import UpPeakCaller
 import settings as s
 
 from tf_agents.environments import utils
@@ -70,7 +71,8 @@ if __name__ == '__main__':
         tf.compat.v1.enable_v2_behavior()
         
         # Building initialization
-        caller = ContinuousRandomCallCaller()
+        #caller = ContinuousRandomCallCaller()
+        caller = UpPeakCaller()
         train_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions()) 
         eval_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions())
         train_env = tf_py_environment.TFPyEnvironment(train_py_building)
@@ -81,8 +83,6 @@ if __name__ == '__main__':
         #eval_py_env = suite_gym.load(env_name)
         #train_env = tf_py_environment.TFPyEnvironment(train_py_env)
         #eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
-
-
 
         # Network and agent initialization
         q_net = q_network.QNetwork(

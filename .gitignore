@@ -3,3 +3,4 @@ venv
 *floyd*
 experiments/*
 .DS_Store
+log.out

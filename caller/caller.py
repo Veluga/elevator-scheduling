@@ -12,7 +12,7 @@ class Caller:
         self.floors = floors
 
     def call_eligible(self):
-        return randint(0, s.AVERAGE_CALL_FREQUENCY) == s.AVERAGE_CALL_FREQUENCY
+        return randint(1, s.AVERAGE_CALL_FREQUENCY) == s.AVERAGE_CALL_FREQUENCY
 
     @abstractmethod
     def generate_call(self):

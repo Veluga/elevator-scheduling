@@ -25,9 +25,6 @@ class Controller:
 
     def run(self):
         for t in range(self.timesteps):
-            call_floor, destination_floor = self.caller.generate_call()
-            if call_floor is not None and destination_floor is not None:
-                self.building.call(call_floor, destination_floor)
             _, state = self.building.sample_state()
             action = self.agent.get_action(state)
             reward = self.building.perform_action(action)
@@ -42,6 +39,8 @@ class Controller:
 
 if __name__ == "__main__":
     from caller.continuous_random_call import ContinuousRandomCallCaller
+    from caller.up_peak_caller import UpPeakCaller
+    from caller.down_peak_caller import DownPeakCaller
     from building.discrete_floor_transition import DiscreteFloorTransition, ElevatorState
     from agent.tabular_q_learning import TabularQLearningAgent
     from agent.differential_semi_gradient_sarsa import DifferentialSemiGradientSarsa, ArtificialNeuralNetwork, sigmoid, linear
@@ -51,14 +50,16 @@ if __name__ == "__main__":
     from visualization.average_reward import AverageReward
     from visualization.cumulative_reward import CumulativeReward
 
-    caller = ContinuousRandomCallCaller()
+    #caller = ContinuousRandomCallCaller()
+    #caller = UpPeakCaller()
+    caller = DownPeakCaller()
     building = DiscreteFloorTransition(caller)
     #agent = TabularQLearningAgent()
     ann = ArtificialNeuralNetwork(1, [(1, 27)], {0: linear})
     #agent = DifferentialSemiGradientSarsa(q=ann, available_actions=list(ElevatorState))
     available_actions = generate_available_actions()
-    #agent = RandomPolicyAgent(available_actions)
-    agent = RoundRobinAgent()
+    agent = RandomPolicyAgent(available_actions)
+    #agent = RoundRobinAgent()
     #viz = AverageReward(sliding_window_size=100)
     viz = CumulativeReward()
     #viz = None
