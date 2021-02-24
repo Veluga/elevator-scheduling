@@ -1,6 +1,11 @@
 #!/bin/bash
 
-LATEST=$(ls -t experiments | head -n1)
+if [[ -z "$1" ]]; then
+    LATEST=$(ls -t experiments | head -n1)
+else
+    LATEST="$1"
+fi
+
 ABSOLUTE="$(pwd)/experiments/${LATEST}"
 AVAILABLE_METRICS=('loss' 'waiting_passengers' 'boarded_passengers' 'avg_return')
 

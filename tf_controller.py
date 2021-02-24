@@ -3,6 +3,7 @@ from building.building import ElevatorState
 from building.discrete_floor_transition import DiscreteFloorTransition
 from caller.continuous_random_call import ContinuousRandomCallCaller
 from caller.up_peak_caller import UpPeakCaller
+from caller.down_peak_caller import DownPeakCaller
 import settings as s
 
 from tf_agents.environments import utils
@@ -33,7 +34,6 @@ def generate_available_actions(num_elevators=s.NUM_ELEVATORS):
             available_actions.append(accu)
             return available_actions
         
-        res = []
         for action in ElevatorState:
             helper(available_actions, deepcopy(accu) + [action], remaining_elevators-1)
         return available_actions
@@ -68,16 +68,17 @@ if __name__ == '__main__':
     random.seed(s.RANDOM_SEED)
 
     with tf.device("/GPU:0"):
+    #with tf.device("/CPU:0"):
         tf.compat.v1.enable_v2_behavior()
         
         # Building initialization
-        #caller = ContinuousRandomCallCaller()
-        caller = UpPeakCaller()
-        train_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions()) 
+        caller = ContinuousRandomCallCaller()
+        #caller = UpPeakCaller()
+        #caller = DownPeakCaller()
+        train_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions())
         eval_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions())
         train_env = tf_py_environment.TFPyEnvironment(train_py_building)
         eval_env = tf_py_environment.TFPyEnvironment(eval_py_building)
-
         #env_name = 'CartPole-v0'
         #train_py_env = suite_gym.load(env_name)
         #eval_py_env = suite_gym.load(env_name)
