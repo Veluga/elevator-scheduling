@@ -2,4 +2,4 @@ numpy
 tensorflow-probability==0.8.0
 tf-agents==0.3.0
 matplotlib
-tensorflow==2.2.0
+tensorflow
