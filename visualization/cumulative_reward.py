@@ -7,7 +7,7 @@ class CumulativeReward(Visualization):
         self.cumulative_rewards = []
 
     def next_reward(self, reward):
-        self.cumulative_reward += sum(reward)
+        self.cumulative_reward += reward
         self.cumulative_rewards.append(self.cumulative_reward)
 
     def display(self):

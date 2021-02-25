@@ -50,16 +50,16 @@ if __name__ == "__main__":
     from visualization.average_reward import AverageReward
     from visualization.cumulative_reward import CumulativeReward
 
-    #caller = ContinuousRandomCallCaller()
-    caller = UpPeakCaller()
+    caller = ContinuousRandomCallCaller()
+    #caller = UpPeakCaller()
     #caller = DownPeakCaller()
     building = DiscreteFloorTransition(caller)
     #agent = TabularQLearningAgent()
     ann = ArtificialNeuralNetwork(1, [(1, 27)], {0: linear})
     #agent = DifferentialSemiGradientSarsa(q=ann, available_actions=list(ElevatorState))
     available_actions = generate_available_actions()
-    #agent = RandomPolicyAgent(available_actions)
-    agent = RoundRobinAgent()
+    agent = RandomPolicyAgent(available_actions)
+    #agent = RoundRobinAgent()
     #viz = AverageReward(sliding_window_size=100)
     viz = CumulativeReward()
     #viz = None

@@ -9,6 +9,8 @@ class Building(ABC):
         self.caller = caller
         self.elevators = [Elevator() for _ in range(elevators)]
         self.floor_height = floor_height
+        self.up_call_waiting_times = {f: 0 for f in range(self.floors)}
+        self.down_call_waiting_times = {f: 0 for f in range(self.floors)}
 
     @abstractmethod
     def call(self, call_floor, destination_floor):
@@ -42,3 +44,4 @@ class Elevator:
         self.state = ElevatorState.STOPPED
         self.buttons_pressed = set()
         self.direction = direction
+        self.button_press_waiting_times = {f: 0 for f in range(s.NUM_FLOORS)}

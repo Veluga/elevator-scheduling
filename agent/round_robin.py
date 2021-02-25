@@ -1,6 +1,5 @@
 from building.building import ElevatorState
 from .agent import Agent
-from copy import deepcopy
 from collections import deque
 import settings as s
 
@@ -31,8 +30,8 @@ class RoundRobinAgent(Agent):
             self.elevator_queues[self.handling_elevator].append(floor)
             self.handling_elevator = (self.handling_elevator+1) % s.NUM_ELEVATORS
         
-        self.prev_up_calls = deepcopy(state['up_calls'])
-        self.prev_down_calls = deepcopy(state['down_calls'])
+        self.prev_up_calls = state['up_calls']
+        self.prev_down_calls = state['down_calls']
 
         actions = []
         for idx, elevator in enumerate(state['elevators']):
