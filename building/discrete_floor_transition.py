@@ -101,15 +101,17 @@ class DiscreteFloorTransition(Building):
                         elevator.button_press_waiting_times[destination],
                         self.down_call_waiting_times[elevator.cur_floor]
                     )
-                self.down_call_waiting_times[elevator.cur_floor] = 0
                 self.down_calls[elevator.cur_floor] = set()
+                self.down_call_waiting_times[elevator.cur_floor] = 0
 
             # Check whether passengers disembarking
             if elevator.cur_floor in elevator.buttons_pressed:
                 elevator.buttons_pressed.remove(elevator.cur_floor)
                 elevator.button_press_waiting_times[elevator.cur_floor] = 0
+
+        t_wait_total = self.calculate_waiting_times()
         self.increment_waiting_times()
-        return self.calculate_waiting_times(op=lambda x: x**2)
+        return t_wait_total
     
     def _reset(self):
         self.up_calls = {floor_num: set() for floor_num in range(self.floors)}

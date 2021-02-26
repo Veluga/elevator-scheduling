@@ -32,8 +32,8 @@ class Controller:
             agent.perform_update(state, action, reward, new_state)
             if self.visualization:
                 self.visualization.next_reward(reward)
-            if t % int(sqrt(self.timesteps)) == 0:
-                print("Time {}/{}".format(t, self.timesteps))
+            """ if t % int(sqrt(self.timesteps)) == 0:
+                print("Time {}/{}".format(t, self.timesteps)) """
         if self.visualization:
             self.visualization.display()
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     #caller = DownPeakCaller()
     building = DiscreteFloorTransition(caller)
     #agent = TabularQLearningAgent()
-    ann = ArtificialNeuralNetwork(1, [(1, 27)], {0: linear})
+    #ann = ArtificialNeuralNetwork(1, [(1, 27)], {0: linear})
     #agent = DifferentialSemiGradientSarsa(q=ann, available_actions=list(ElevatorState))
     available_actions = generate_available_actions()
     agent = RandomPolicyAgent(available_actions)
@@ -65,4 +65,7 @@ if __name__ == "__main__":
     #viz = None
 
     ctrl = Controller(building, caller, agent, visualization=viz, timesteps=3600)
-    ctrl.run()
+    for i in range(10):
+        building.reset()
+        ctrl.visualization.cumulative_reward = 0
+        ctrl.run()
