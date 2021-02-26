@@ -10,12 +10,14 @@ from tf_agents.environments import utils
 from tf_agents.environments import tf_py_environment
 from tf_agents.environments import tf_environment
 from tf_agents.agents.dqn import dqn_agent
+from tf_agents.agents.categorical_dqn import categorical_dqn_agent
 from tf_agents.drivers import dynamic_step_driver
 from tf_agents.environments import suite_gym
 from tf_agents.environments import tf_py_environment
 from tf_agents.eval import metric_utils
 from tf_agents.metrics import tf_metrics
 from tf_agents.networks import q_network
+from tf_agents.networks import categorical_q_network
 from tf_agents.policies import random_tf_policy
 from tf_agents.policies.policy_saver import PolicySaver
 from tf_agents.replay_buffers import tf_uniform_replay_buffer
@@ -86,26 +88,31 @@ if __name__ == '__main__':
         #eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 
         # Network and agent initialization
-        q_net = q_network.QNetwork(
+        categorical_q_net = categorical_q_network.CategoricalQNetwork(
             train_env.observation_spec(),
             train_env.action_spec(),
+            num_atoms=s.NUM_ATOMS,
             fc_layer_params=s.FC_LAYER_PARAMS
         )
-        
+
         optimizer = tf.keras.optimizers.Adam(learning_rate=s.LEARNING_RATE)
         
         train_step_counter = tf.Variable(0)
         
-        agent = dqn_agent.DqnAgent(
+        agent = categorical_dqn_agent.CategoricalDqnAgent(
             train_env.time_step_spec(),
             train_env.action_spec(),
-            q_network=q_net,
+            categorical_q_network=categorical_q_net,
             optimizer=optimizer,
+            min_q_value=s.MIN_Q_VALUE,
+            max_q_value=s.MAX_Q_VALUE,
+            n_step_update=s.N_STEP_UPDATE,
             td_errors_loss_fn=common.element_wise_squared_loss,
+            gamma=s.DISCOUNT_RATE,
             train_step_counter=train_step_counter
         )
-
         agent.initialize()
+
         agent.train = common.function(agent.train)
 
         # Replay buffer initialization

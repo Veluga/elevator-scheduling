@@ -64,7 +64,7 @@ class DiscreteFloorTransition(Building):
 
             # Check whether passengers disembarking
             if elevator.cur_floor in elevator.buttons_pressed:
-                rewards[-1] += 2
+                rewards[-1] += s.REWARD_DELIVERED_PASSENGER
                 elevator.buttons_pressed.remove(elevator.cur_floor)
         return rewards
     
