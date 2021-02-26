@@ -95,9 +95,9 @@ if __name__ == '__main__':
             fc_layer_params=s.FC_LAYER_PARAMS
         )
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate=s.LEARNING_RATE)
+        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=s.LEARNING_RATE)
         
-        train_step_counter = tf.Variable(0)
+        train_step_counter = tf.compat.v2.Variable(0)
         
         agent = categorical_dqn_agent.CategoricalDqnAgent(
             train_env.time_step_spec(),
@@ -131,7 +131,7 @@ if __name__ == '__main__':
         dataset = replay_buffer.as_dataset(
             num_parallel_calls=3,
             sample_batch_size=s.BATCH_SIZE,
-            num_steps=2
+            num_steps=s.N_STEP_UPDATE+1
         ).prefetch(3)
 
         iterator = iter(dataset)
@@ -146,7 +146,7 @@ if __name__ == '__main__':
 
             # Sample a batch of data from the buffer and update the agent's network.
             experience, _ = next(iterator)
-            train_loss = agent.train(experience).loss
+            train_loss = agent.train(experience)
 
             step = agent.train_step_counter.numpy()
 
@@ -154,7 +154,7 @@ if __name__ == '__main__':
                 env = train_env.envs[0].building
                 waiting_passengers = sum([len(env.up_calls[f]) + len(env.down_calls[f]) for f in range(env.floors)])
                 boarded_passengers = sum([len(e.buttons_pressed) for e in env.elevators])
-                print('{{"metric": "loss", "value": {}, "step": {}}}'.format(train_loss, step))
+                print('{{"metric": "loss", "value": {}, "step": {}}}'.format(train_loss.loss, step))
                 print('{{"metric": "waiting_passengers", "value": {}, "step": {}}}'.format(waiting_passengers, step))
                 print('{{"metric": "boarded_passengers", "value": {}, "step": {}}}'.format(boarded_passengers, step))
                 sys.stdout.flush()
