@@ -10,12 +10,14 @@ from tf_agents.environments import utils
 from tf_agents.environments import tf_py_environment
 from tf_agents.environments import tf_environment
 from tf_agents.agents.dqn import dqn_agent
+from tf_agents.agents.reinforce import reinforce_agent
 from tf_agents.drivers import dynamic_step_driver
 from tf_agents.environments import suite_gym
 from tf_agents.environments import tf_py_environment
 from tf_agents.eval import metric_utils
 from tf_agents.metrics import tf_metrics
 from tf_agents.networks import q_network
+from tf_agents.networks import actor_distribution_network
 from tf_agents.policies import random_tf_policy
 from tf_agents.policies.policy_saver import PolicySaver
 from tf_agents.replay_buffers import tf_uniform_replay_buffer
@@ -39,18 +41,6 @@ def generate_available_actions(num_elevators=s.NUM_ELEVATORS):
         return available_actions
     return helper([], [], num_elevators)
 
-def collect_step(environment, policy, buffer):
-    time_step = environment.current_time_step()
-    action_step = policy.action(time_step)
-    next_time_step = environment.step(action_step.action)
-    traj = trajectory.from_transition(time_step, action_step, next_time_step)
-    # Add trajectory to the replay buffer
-    buffer.add_batch(traj)
-
-def collect_data(env, policy, buffer, steps):
-    for _ in range(steps):
-        collect_step(env, policy, buffer)
-
 def compute_avg_return(environment, policy, num_episodes=10):
     total_return = 0.0
     for _ in range(num_episodes):
@@ -63,6 +53,23 @@ def compute_avg_return(environment, policy, num_episodes=10):
         total_return += episode_return
     avg_return = total_return / num_episodes
     return avg_return.numpy()[0]
+
+def collect_episode(environment, policy, num_episodes):
+
+  episode_counter = 0
+  environment.reset()
+
+  while episode_counter < num_episodes:
+    time_step = environment.current_time_step()
+    action_step = policy.action(time_step)
+    next_time_step = environment.step(action_step.action)
+    traj = trajectory.from_transition(time_step, action_step, next_time_step)
+
+    # Add trajectory to the replay buffer
+    replay_buffer.add_batch(traj)
+
+    if traj.is_boundary():
+      episode_counter += 1
 
 if __name__ == '__main__':
     random.seed(s.RANDOM_SEED)
@@ -86,26 +93,26 @@ if __name__ == '__main__':
         #eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 
         # Network and agent initialization
-        q_net = q_network.QNetwork(
+        actor_net = actor_distribution_network.ActorDistributionNetwork(
             train_env.observation_spec(),
             train_env.action_spec(),
             fc_layer_params=s.FC_LAYER_PARAMS
         )
         
-        optimizer = tf.keras.optimizers.Adam(learning_rate=s.LEARNING_RATE)
-        
-        train_step_counter = tf.Variable(0)
-        
-        agent = dqn_agent.DqnAgent(
+        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=s.LEARNING_RATE)
+
+        train_step_counter = tf.compat.v2.Variable(0)
+
+        agent = reinforce_agent.ReinforceAgent(
             train_env.time_step_spec(),
             train_env.action_spec(),
-            q_network=q_net,
+            actor_network=actor_net,
             optimizer=optimizer,
-            td_errors_loss_fn=common.element_wise_squared_loss,
+            normalize_returns=True,
             train_step_counter=train_step_counter
         )
-
         agent.initialize()
+
         agent.train = common.function(agent.train)
 
         # Replay buffer initialization
@@ -120,7 +127,7 @@ if __name__ == '__main__':
             train_env.action_spec()
         )
         
-        collect_data(train_env, random_policy, replay_buffer, s.INTIIAL_COLLECT_STEPS)
+        #collect_data(train_env, random_policy, replay_buffer, s.INTIIAL_COLLECT_STEPS)
         dataset = replay_buffer.as_dataset(
             num_parallel_calls=3,
             sample_batch_size=s.BATCH_SIZE,
@@ -134,12 +141,17 @@ if __name__ == '__main__':
         weights_dir = str(pathlib.Path(__file__).parent.absolute()) + "/weights/"
 
         for _ in range(s.NUM_ITERATIONS):
-            # Collect a few steps using collect_policy and save to the replay buffer.
-            collect_data(train_env, agent.collect_policy, replay_buffer, s.COLLECT_STEPS_PER_ITERATION)
+            # Collect a few episodes using collect_policy and save to the replay buffer.
+            collect_episode(
+                train_env,
+                agent.collect_policy,
+                s.COLLECT_EPISODES_PER_ITERATION
+            )
 
-            # Sample a batch of data from the buffer and update the agent's network.
-            experience, _ = next(iterator)
-            train_loss = agent.train(experience).loss
+            # Use data from the buffer and update the agent's network.
+            experience = replay_buffer.gather_all()
+            train_loss = agent.train(experience)
+            replay_buffer.clear()
 
             step = agent.train_step_counter.numpy()
 
@@ -147,7 +159,7 @@ if __name__ == '__main__':
                 env = train_env.envs[0].building
                 waiting_passengers = sum([len(env.up_calls[f]) + len(env.down_calls[f]) for f in range(env.floors)])
                 boarded_passengers = sum([len(e.buttons_pressed) for e in env.elevators])
-                print('{{"metric": "loss", "value": {}, "step": {}}}'.format(train_loss, step))
+                print('{{"metric": "loss", "value": {}, "step": {}}}'.format(train_loss.loss, step))
                 print('{{"metric": "waiting_passengers", "value": {}, "step": {}}}'.format(waiting_passengers, step))
                 print('{{"metric": "boarded_passengers", "value": {}, "step": {}}}'.format(boarded_passengers, step))
                 sys.stdout.flush()
