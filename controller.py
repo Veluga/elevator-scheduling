@@ -50,8 +50,8 @@ if __name__ == "__main__":
     from visualization.average_reward import AverageReward
     from visualization.cumulative_reward import CumulativeReward
 
-    #caller = ContinuousRandomCallCaller()
-    caller = UpPeakCaller()
+    caller = ContinuousRandomCallCaller()
+    #caller = UpPeakCaller()
     #caller = DownPeakCaller()
     building = DiscreteFloorTransition(caller)
     #agent = TabularQLearningAgent()
@@ -66,3 +66,4 @@ if __name__ == "__main__":
 
     ctrl = Controller(building, caller, agent, visualization=viz, timesteps=3600)
     ctrl.run()
+    print("Delivered Passengers: {}%".format(ctrl.visualization.cumulative_reward / 2 / building._generated_calls))
