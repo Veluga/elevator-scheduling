@@ -1,5 +1,6 @@
 from math import sqrt
 from copy import deepcopy
+from building.discrete_floor_transition import ElevatorState
 import settings as s
 
 

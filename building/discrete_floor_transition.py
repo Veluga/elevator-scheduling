@@ -37,7 +37,7 @@ class DiscreteFloorTransition(Building):
                     elevator.cur_floor -= 1
                     elevator.direction = ElevatorState.DESCENDING
             return 0
-        
+
         from_, to = self.caller.generate_call()
         if from_ is not None and to is not None:
             self.call(from_, to)

@@ -10,11 +10,12 @@ LATEST=$((LATEST + 1))
 DIRNAME="./experiments/${LATEST}_$1"
 mkdir "$DIRNAME"
 
-cp tf_controller.py "$DIRNAME"
+cp es_controller.py "$DIRNAME"
 cp -r agent "$DIRNAME"
 cp -r building "$DIRNAME"
 cp -r caller "$DIRNAME"
 cp settings.py "$DIRNAME"
+cp controller.py "$DIRNAME"
 
 mkdir "${DIRNAME}/weights"
 mkdir "${DIRNAME}/plots"
@@ -22,4 +23,4 @@ touch "${DIRNAME}/model_log.txt"
 
 vim "${DIRNAME}/settings.py"
 
-python "${DIRNAME}/tf_controller.py" &> "${DIRNAME}/model_log.txt" &
+python "${DIRNAME}/es_controller.py" &> "${DIRNAME}/model_log.txt" &
