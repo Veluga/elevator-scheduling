@@ -57,8 +57,8 @@ if __name__ == "__main__":
     
     available_actions = generate_available_actions()
     
-    #agent = RandomPolicyAgent(available_actions)
-    agent = RoundRobinAgent()
+    agent = RandomPolicyAgent(available_actions)
+    #agent = RoundRobinAgent()
     
     #viz = AverageReward(sliding_window_size=100)
     viz = CumulativeReward()

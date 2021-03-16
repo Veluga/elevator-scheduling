@@ -4,11 +4,10 @@ from caller.caller import Call
 from enum import IntEnum
 
 class Building(ABC):
-    def __init__(self, caller, floors=s.NUM_FLOORS, elevators=s.NUM_ELEVATORS, floor_height=s.FLOOR_HEIGHT):
+    def __init__(self, caller, floors=s.NUM_FLOORS, elevators=s.NUM_ELEVATORS):
         self.floors = floors
         self.caller = caller
         self.elevators = [Elevator() for _ in range(elevators)]
-        self.floor_height = floor_height
 
     @abstractmethod
     def call(self, call_floor, destination_floor):

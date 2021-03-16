@@ -26,17 +26,6 @@ class DiscreteFloorTransition(Building):
             np_state_vector = np.append(np_state_vector, [f in e.buttons_pressed for f in range(self.floors)])
         return np_state_vector, {'up_calls': self.up_calls, 'down_calls': self.down_calls, 'elevators': self.elevators}
 
-    def total_waiting_cost(self):
-        total_cost = 0
-        for f in range(self.floors):
-            if len(self.up_calls[f]) > 0:
-                total_cost -= 1
-            if len(self.down_calls[f]) > 0:
-                total_cost -= 1
-        for e in self.elevators:
-            total_cost -= len(e.buttons_pressed)
-        return total_cost
-
     def perform_action(self, actions):
         def update_position(elevator, action):
             if action == ElevatorState.ASCENDING:
@@ -79,7 +68,7 @@ class DiscreteFloorTransition(Building):
             if elevator.cur_floor in elevator.buttons_pressed:
                 rewards[-1] += s.REWARD_DELIVERED_PASSENGER
                 elevator.buttons_pressed.remove(elevator.cur_floor)
-        return self.total_waiting_cost()
+        return rewards
     
     def _reset(self):
         self.up_calls = {floor_num: set() for floor_num in range(self.floors)}

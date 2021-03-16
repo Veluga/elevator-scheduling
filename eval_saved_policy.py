@@ -1,10 +1,10 @@
-from caller.continuous_random_call import ContinuousRandomCallCaller
+from caller.interfloor_caller import InterfloorCaller
 from caller.up_peak_caller import UpPeakCaller
 from caller.down_peak_caller import DownPeakCaller
 from building.tf_building import TFBuilding
 from building.building import ElevatorState
 from building.discrete_floor_transition import DiscreteFloorTransition
-from tf_controller import generate_available_actions
+from benchmark_controller import generate_available_actions
 from copy import deepcopy
 
 from tf_agents.environments import tf_py_environment
@@ -16,7 +16,7 @@ import sys
 available_actions = generate_available_actions()
 
 # Building initialization
-#caller = ContinuousRandomCallCaller()
+#caller = InterfloorCaller()
 #caller = UpPeakCaller()
 caller = DownPeakCaller()
 eval_py_building = TFBuilding(DiscreteFloorTransition(caller), available_actions)

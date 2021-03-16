@@ -78,52 +78,14 @@ def evaluate_individual(individual, building, available_actions):
         episode_reward += sum(building.perform_action(action))
     return episode_reward
 
-""" class DummyEnvironment:
-    class Action(Enum):
-        LEFT = 0
-        RIGHT = 1
-
-    def __init__(self, num_states=1000):
-        self.num_states = num_states
-        self.current_state = 0
-
-    def get_available_actions(self):
-        return [DummyEnvironment.Action.LEFT, DummyEnvironment.Action.RIGHT]
-    
-    def perform_action(self, action):
-        reward = 0
-        if self.current_state == self.num_states-1:
-            reward = 1
-        if action == DummyEnvironment.Action.LEFT:
-            self.current_state -= 1
-        else:
-            self.current_state += 1
-        self.current_state %= self.num_states
-        return reward
-
-    def sample_state(self):
-        return np.array([self.current_state])
-    
-    def reset(self):
-        self.current_state = 0
-
-def evaluate_individual(individual, env, available_actions):
-    env.reset()
-    episode_reward = 0
-    for _ in range(s.EPISODE_LENGTH):
-        state = env.sample_state()
-        action = available_actions[individual.predict(state)]
-        episode_reward += env.perform_action(action)
-    return episode_reward """
-
 if __name__ == '__main__':
     from building.discrete_floor_transition import DiscreteFloorTransition
-    from caller.continuous_random_call import ContinuousRandomCallCaller
-    from controller import generate_available_actions
+    from caller.interfloor_caller import InterfloorCaller
+    from benchmark_controller import generate_available_actions
 
     random.seed(s.RANDOM_SEED)
 
-    caller = ContinuousRandomCallCaller()
+    caller = InterfloorCaller()
     building = DiscreteFloorTransition(caller)
     
     state_vec, _ = building.sample_state()
@@ -142,16 +104,16 @@ if __name__ == '__main__':
         
         standard_score = (episode_rewards - np.mean(episode_rewards)) / np.std(episode_rewards)
         for j in range(s.POPULATION_SIZE):
-            w = w + population[j] * (standard_score[j] * s.LEARNING_RATE/(s.POPULATION_SIZE * s.NOISE_STANDARD_DEVIATION))
+            w = w + population[j] * (standard_score[j] * s.ES_LEARNING_RATE/(s.POPULATION_SIZE * s.NOISE_STANDARD_DEVIATION))
 
-        if step % s.EVAL_INTERVAL == 0:
+        if step % s.ES_EVAL_INTERVAL == 0:
             avg_return = 0
-            for _ in range(s.NUM_EVAL_EPISODES):
+            for _ in range(s.ES_NUM_EVAL_EPISODES):
                 avg_return += evaluate_individual(w, building, available_actions)
-            avg_return /= s.NUM_EVAL_EPISODES
+            avg_return /= s.ES_NUM_EVAL_EPISODES
             print('{{"metric": "avg_return", "value": {}, "step": {}}}'.format(avg_return, step))
             sys.stdout.flush()
         
-        if step > 0 and step % s.POLICY_SAVER_INTERVAL == 0:
+        if step > 0 and step % s.ES_POLICY_SAVER_INTERVAL == 0:
             weights_dir = str(pathlib.Path(__file__).parent.absolute()) + "/weights/"
             np.save(weights_dir + "policy_{}.npy".format(step), w)

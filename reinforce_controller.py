@@ -99,7 +99,7 @@ if __name__ == '__main__':
             fc_layer_params=s.FC_LAYER_PARAMS
         )
         
-        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=s.LEARNING_RATE)
+        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=s.REINFORCE_LEARNING_RATE)
 
         train_step_counter = tf.compat.v2.Variable(0)
 
@@ -127,7 +127,6 @@ if __name__ == '__main__':
             train_env.action_spec()
         )
         
-        #collect_data(train_env, random_policy, replay_buffer, s.INTIIAL_COLLECT_STEPS)
         dataset = replay_buffer.as_dataset(
             num_parallel_calls=3,
             sample_batch_size=s.BATCH_SIZE,
@@ -145,7 +144,7 @@ if __name__ == '__main__':
             collect_episode(
                 train_env,
                 agent.collect_policy,
-                s.COLLECT_EPISODES_PER_ITERATION
+                s.REINFORCE_COLLECT_EPISODES_PER_ITERATION
             )
 
             # Use data from the buffer and update the agent's network.
@@ -155,7 +154,7 @@ if __name__ == '__main__':
 
             step = agent.train_step_counter.numpy()
 
-            if step % s.LOG_INTERVAL == 0:
+            if step % s.REINFORCE_LOG_INTERVAL == 0:
                 env = train_env.envs[0].building
                 waiting_passengers = sum([len(env.up_calls[f]) + len(env.down_calls[f]) for f in range(env.floors)])
                 boarded_passengers = sum([len(e.buttons_pressed) for e in env.elevators])
@@ -164,10 +163,10 @@ if __name__ == '__main__':
                 print('{{"metric": "boarded_passengers", "value": {}, "step": {}}}'.format(boarded_passengers, step))
                 sys.stdout.flush()
 
-            if step % s.EVAL_INTERVAL == 0:
-                avg_return = compute_avg_return(eval_env, agent.policy, s.NUM_EVAL_EPISODES)
+            if step % s.REINFORCE_EVAL_INTERVAL == 0:
+                avg_return = compute_avg_return(eval_env, agent.policy, s.REINFORCE_NUM_EVAL_EPISODES)
                 print('{{"metric": "avg_return", "value": {}, "step": {}}}'.format(avg_return, step))
                 sys.stdout.flush()
 
-            if step % s.POLICY_SAVER_INTERVAL == 0:
+            if step % s.REINFORCE_POLICY_SAVER_INTERVAL == 0:
                 saver.save(weights_dir + 'policy_{}'.format(step))

@@ -95,7 +95,7 @@ if __name__ == '__main__':
             fc_layer_params=s.FC_LAYER_PARAMS
         )
 
-        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=s.LEARNING_RATE)
+        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=s.DQN_LEARNING_RATE)
         
         train_step_counter = tf.compat.v2.Variable(0)
         
@@ -127,7 +127,7 @@ if __name__ == '__main__':
             train_env.action_spec()
         )
         
-        collect_data(train_env, random_policy, replay_buffer, s.INTIIAL_COLLECT_STEPS)
+        collect_data(train_env, random_policy, replay_buffer, s.DQN_INITIAL_COLLECT_STEPS)
         dataset = replay_buffer.as_dataset(
             num_parallel_calls=3,
             sample_batch_size=s.BATCH_SIZE,
@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
         for _ in range(s.NUM_ITERATIONS):
             # Collect a few steps using collect_policy and save to the replay buffer.
-            collect_data(train_env, agent.collect_policy, replay_buffer, s.COLLECT_STEPS_PER_ITERATION)
+            collect_data(train_env, agent.collect_policy, replay_buffer, s.DQN_COLLECT_STEPS_PER_ITERATION)
 
             # Sample a batch of data from the buffer and update the agent's network.
             experience, _ = next(iterator)
@@ -150,7 +150,7 @@ if __name__ == '__main__':
 
             step = agent.train_step_counter.numpy()
 
-            if step % s.LOG_INTERVAL == 0:
+            if step % s.DQN_LOG_INTERVAL == 0:
                 env = train_env.envs[0].building
                 waiting_passengers = sum([len(env.up_calls[f]) + len(env.down_calls[f]) for f in range(env.floors)])
                 boarded_passengers = sum([len(e.buttons_pressed) for e in env.elevators])
@@ -159,10 +159,10 @@ if __name__ == '__main__':
                 print('{{"metric": "boarded_passengers", "value": {}, "step": {}}}'.format(boarded_passengers, step))
                 sys.stdout.flush()
 
-            if step % s.EVAL_INTERVAL == 0:
-                avg_return = compute_avg_return(eval_env, agent.policy, s.NUM_EVAL_EPISODES)
+            if step % s.DQN_EVAL_INTERVAL == 0:
+                avg_return = compute_avg_return(eval_env, agent.policy, s.DQN_NUM_EVAL_EPISODES)
                 print('{{"metric": "avg_return", "value": {}, "step": {}}}'.format(avg_return, step))
                 sys.stdout.flush()
 
-            if step % s.POLICY_SAVER_INTERVAL == 0:
+            if step % s.DQN_POLICY_SAVER_INTERVAL == 0:
                 saver.save(weights_dir + 'policy_{}'.format(step))

@@ -59,10 +59,7 @@ class TFBuilding(py_environment.PyEnvironment):
 
         self._timestep += 1
 
-        """ if self._timestep % int(sqrt(1000)) == 0:
-            print("Time {}/{}".format(self._timestep, 1000)) """
-
-        reward = self.building.perform_action(self.available_actions[action_idx])
+        reward = sum(self.building.perform_action(self.available_actions[action_idx]))
 
         self._state = self._sample_state()
         if self._timestep >= s.EPISODE_LENGTH:
