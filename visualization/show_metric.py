@@ -2,6 +2,10 @@ from sys import stdin, argv
 import matplotlib.pyplot as plt
 import json
 
+"""Show matplotlib plot for single metric (e.g. avg_return).
+Used by visualize_metric script.
+"""
+
 x = []
 y = []
 for line in stdin:

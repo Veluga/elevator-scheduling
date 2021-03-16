@@ -3,6 +3,9 @@ from .caller import Caller
 from random import randint
 
 class UpPeakCaller(Caller):
+    """Caller that implements an up-peak traffic profile.
+    Any generated call will have the ground floor as its call floor.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

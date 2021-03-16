@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Generate new experiment with name $1, using controller $2
+# This will copy all relevant files to a new directory with name $1 in the experiments folder
+
 if [[ -z "$1" ]]; then
     echo "Require experiment name."
     exit 1

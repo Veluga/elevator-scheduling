@@ -2,6 +2,10 @@ from sys import stdin, argv
 import matplotlib.pyplot as plt
 import json
 
+"""Save matplotlib plot for single metric (e.g. avg_return) as an image.
+Used by gen_metrics script.
+"""
+
 x = []
 y = []
 for line in stdin:

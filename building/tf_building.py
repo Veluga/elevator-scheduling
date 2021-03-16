@@ -14,6 +14,10 @@ import settings as s
 
 
 class TFBuilding(py_environment.PyEnvironment):
+    """Boilerplate code that wraps a building with a tf-agents compatible environment.
+    See https://www.tensorflow.org/agents/api_docs/python/tf_agents/environments/py_environment/PyEnvironment
+    for documentation and https://www.tensorflow.org/agents/tutorials/2_environments_tutorial for a tutorial.
+    """
     def __init__(self, building, available_actions):
         self.building = building
         self.available_actions = available_actions
@@ -49,6 +53,7 @@ class TFBuilding(py_environment.PyEnvironment):
         self._timestep = 0
         self._rewards = 0
         self._episode_ended = False
+        # Reset wrapped building
         self.building.reset()
         self._state = self._sample_state()
         return ts.restart(np.array(self._state, dtype=np.int32))

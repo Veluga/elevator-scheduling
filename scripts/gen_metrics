@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Generate metric plots for latest experiment (empty first argument), or specified experiment (name as first argument)
+# Plots are saved in plots/ directory of experiment
+
 if [[ -z "$1" ]]; then
     LATEST=$(ls -t experiments | head -n1)
 else

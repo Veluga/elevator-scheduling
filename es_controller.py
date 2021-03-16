@@ -6,12 +6,16 @@ import sys
 from enum import Enum
 
 class ANN:
+    """Hosts data of individuals.
+    Consists of one or more network layers.
+    """
     def __init__(self, input_dims, hidden_layer_units, num_actions, scale=s.NOISE_STANDARD_DEVIATION):
         # Input is extended by bias
         self.input_dims = input_dims
         self.hidden_layer_units = hidden_layer_units
         self.num_actions = num_actions
 
+        # Generate random network layers
         self.input_layer = np.random.normal(size=(input_dims+1, hidden_layer_units[0]), scale=scale)
         self.hidden_layers = []
         for i in range(1, len(hidden_layer_units)):
@@ -25,12 +29,15 @@ class ANN:
         return e_x / e_x.sum(axis=0)
 
     def _relu(self, x):
+        """ReLu activation"""
         return np.maximum(x, 0)
 
     def _sigmoid(self, z):
+        """Sigmoid activation"""
         return 1/(1+np.exp(-z))
 
     def predict(self, input_):
+        """Forward propagation without backpropagation"""
         # Bias extension
         input_ = np.append(input_, [1])
         input_ = np.transpose(input_)
@@ -48,6 +55,9 @@ class ANN:
         return np.argmax(outputs)
 
     def __add__(self, other):
+        """ANN + ANN
+        Adds layer matrices.
+        """
         res = ANN(self.input_dims, self.hidden_layer_units, self.num_actions)
         res.input_layer = self.input_layer + other.input_layer
         
@@ -59,6 +69,9 @@ class ANN:
         return res
 
     def __mul__(self, scalar):
+        """ANN * scalar
+        Scales layer matrices by scalar.
+        """
         res = ANN(self.input_dims, self.hidden_layer_units, self.num_actions)
         res.input_layer = self.input_layer * scalar
         
@@ -70,6 +83,7 @@ class ANN:
         return res
 
 def evaluate_individual(individual, building, available_actions):
+    """Gauge performance of individual ANN in building environment."""
     building.reset()
     episode_reward = 0
     for _ in range(s.EPISODE_LENGTH):
@@ -84,6 +98,7 @@ if __name__ == '__main__':
     from benchmark_controller import generate_available_actions
 
     random.seed(s.RANDOM_SEED)
+    np.random.seed(s.RANDOM_SEED)
 
     caller = InterfloorCaller()
     building = DiscreteFloorTransition(caller)
@@ -97,13 +112,17 @@ if __name__ == '__main__':
 
     for step in range(s.NUM_ITERATIONS):
         episode_rewards = np.zeros(s.POPULATION_SIZE)
+        # Generate random population
         population = [ANN(input_dims, s.FC_LAYER_PARAMS, len(available_actions)) for _ in range(s.POPULATION_SIZE)]
         for j in range(s.POPULATION_SIZE):
+            # Evaluate individuals
             w_try = population[j] + w
             episode_rewards[j] = evaluate_individual(w_try, building, available_actions)
         
+        # Scale results based on standard score
         standard_score = (episode_rewards - np.mean(episode_rewards)) / np.std(episode_rewards)
         for j in range(s.POPULATION_SIZE):
+            # Modify w proportional to individual's relative performance
             w = w + population[j] * (standard_score[j] * s.ES_LEARNING_RATE/(s.POPULATION_SIZE * s.NOISE_STANDARD_DEVIATION))
 
         if step % s.ES_EVAL_INTERVAL == 0:

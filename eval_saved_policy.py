@@ -10,18 +10,22 @@ from copy import deepcopy
 from tf_agents.environments import tf_py_environment
 from tf_agents.environments import tf_environment
 import tensorflow as tf
+import numpy as np
 import sys
 
+
+"""Given path to stored model (./experiments/.../weights/policy_XYZ), evaluate model performance over one episode."""
 
 available_actions = generate_available_actions()
 
 # Building initialization
+caller = DownPeakCaller()
 #caller = InterfloorCaller()
 #caller = UpPeakCaller()
-caller = DownPeakCaller()
 eval_py_building = TFBuilding(DiscreteFloorTransition(caller), available_actions)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_building)
 
+# Restore policy
 saved_policy = tf.compat.v2.saved_model.load(sys.argv[1])
 time_step = eval_env.reset()
 episode_return = 0.0
@@ -29,6 +33,7 @@ episode_return = 0.0
 tf.compat.v1.enable_v2_behavior()
 
 while not time_step.is_last():
+    # Sample-act-sample
     raw_env = eval_env.envs[0].building
     _, old_state = raw_env.sample_state()
     old_state = deepcopy(old_state)

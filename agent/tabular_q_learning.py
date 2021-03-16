@@ -4,6 +4,9 @@ from building.building import ElevatorState
 from random import random, sample
 
 class TabularQLearningAgent(Agent):
+    """Implementation of tabular learning agent for very small building sizes.
+    Epsilon greedy action selection policy.
+    """
     def __init__(self, gamma=s.DISCOUNT_RATE, alpha=s.STEP_SIZE, epsilon=s.EPSILON, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.epsilon = epsilon
@@ -13,6 +16,7 @@ class TabularQLearningAgent(Agent):
         self.last_state_action_pair = None
 
     def get_estimated_best_action(self, state):
+        """Get action with largest estimated Q-value"""
         max_val = float('-inf')
         max_action = None
         for action in self.get_available_actions(self.elevators, ()):
@@ -22,6 +26,7 @@ class TabularQLearningAgent(Agent):
         return max_action, max_val
 
     def get_available_actions(self, elevators, accu):
+        """Recursive generator to get all available actions for list of elevators."""
         if elevators == 0:
             yield accu
             return
@@ -31,7 +36,7 @@ class TabularQLearningAgent(Agent):
     def init_action_values(self, state):
         for action in self.get_available_actions(self.elevators, ()):
             self.q[(state, action)] = 0
-        # Hack to make checking for stored action values easier
+        # Hack to make checking for stored action values easier (see first conditional in get_action)
         self.q[state] = True
 
     def get_action(self, state):
@@ -40,11 +45,13 @@ class TabularQLearningAgent(Agent):
             self.init_action_values(state)
         
         if random() < self.epsilon:
+            # Exploration
             exploratory_action = sample(
                 list(self.get_available_actions(self.elevators, ())), 1
             )[0]
             return exploratory_action
         else:
+            # Exploitation
             max_action, _ =  self.get_estimated_best_action(state)
             return max_action
 

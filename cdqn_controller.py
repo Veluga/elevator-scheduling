@@ -4,6 +4,8 @@ from building.discrete_floor_transition import DiscreteFloorTransition
 from caller.interfloor_caller import InterfloorCaller
 from caller.up_peak_caller import UpPeakCaller
 from caller.down_peak_caller import DownPeakCaller
+from benchmark_controller import generate_available_actions
+from dqn_controller import collect_step, collect_data, compute_avg_return
 import settings as s
 
 from tf_agents.environments import utils
@@ -25,49 +27,19 @@ from tf_agents.trajectories import trajectory
 from tf_agents.specs import tensor_spec
 from tf_agents.utils import common
 from copy import deepcopy
+import numpy as np
 import tensorflow as tf
 import pathlib
 import random
 import sys
 
-def generate_available_actions(num_elevators=s.NUM_ELEVATORS):
-    def helper(available_actions, accu, remaining_elevators):
-        if remaining_elevators == 0:
-            available_actions.append(accu)
-            return available_actions
-        
-        for action in ElevatorState:
-            helper(available_actions, deepcopy(accu) + [action], remaining_elevators-1)
-        return available_actions
-    return helper([], [], num_elevators)
 
-def collect_step(environment, policy, buffer):
-    time_step = environment.current_time_step()
-    action_step = policy.action(time_step)
-    next_time_step = environment.step(action_step.action)
-    traj = trajectory.from_transition(time_step, action_step, next_time_step)
-    # Add trajectory to the replay buffer
-    buffer.add_batch(traj)
-
-def collect_data(env, policy, buffer, steps):
-    for _ in range(steps):
-        collect_step(env, policy, buffer)
-
-def compute_avg_return(environment, policy, num_episodes=10):
-    total_return = 0.0
-    for _ in range(num_episodes):
-        time_step = environment.reset()
-        episode_return = 0.0
-        while not time_step.is_last():
-            action_step = policy.action(time_step)
-            time_step = environment.step(action_step.action)
-            episode_return += time_step.reward
-        total_return += episode_return
-    avg_return = total_return / num_episodes
-    return avg_return.numpy()[0]
+# Code based on tf-agents documentation (https://www.tensorflow.org/agents/tutorials/9_c51_tutorial)
 
 if __name__ == '__main__':
     random.seed(s.RANDOM_SEED)
+    tf.random.set_seed(s.RANDOM_SEED)
+    np.random.seed(s.RANDOM_SEED)
 
     with tf.device("/GPU:0"):
     #with tf.device("/CPU:0"):
@@ -81,11 +53,6 @@ if __name__ == '__main__':
         eval_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions())
         train_env = tf_py_environment.TFPyEnvironment(train_py_building)
         eval_env = tf_py_environment.TFPyEnvironment(eval_py_building)
-        #env_name = 'CartPole-v0'
-        #train_py_env = suite_gym.load(env_name)
-        #eval_py_env = suite_gym.load(env_name)
-        #train_env = tf_py_environment.TFPyEnvironment(train_py_env)
-        #eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 
         # Network and agent initialization
         categorical_q_net = categorical_q_network.CategoricalQNetwork(
@@ -127,6 +94,7 @@ if __name__ == '__main__':
             train_env.action_spec()
         )
         
+        # Collect a few trajectories using random policies to populate replay buffer
         collect_data(train_env, random_policy, replay_buffer, s.DQN_INITIAL_COLLECT_STEPS)
         dataset = replay_buffer.as_dataset(
             num_parallel_calls=3,
@@ -141,10 +109,10 @@ if __name__ == '__main__':
         weights_dir = str(pathlib.Path(__file__).parent.absolute()) + "/weights/"
 
         for _ in range(s.NUM_ITERATIONS):
-            # Collect a few steps using collect_policy and save to the replay buffer.
+            # Collect a few steps using collect_policy and save to the replay buffer
             collect_data(train_env, agent.collect_policy, replay_buffer, s.DQN_COLLECT_STEPS_PER_ITERATION)
 
-            # Sample a batch of data from the buffer and update the agent's network.
+            # Sample a batch of data from the buffer and update the agent's network
             experience, _ = next(iterator)
             train_loss = agent.train(experience)
 

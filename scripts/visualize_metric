@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Plot a single metric with name $1 for latest experiment, displaying plot using matplotlib
+
 if [[ -z "$1" ]]; then
     echo "Require metric name."
     echo "Available choices are loss, waiting_passengers, boarded_passengers, avg_return."

@@ -4,6 +4,8 @@ from building.discrete_floor_transition import DiscreteFloorTransition
 from caller.interfloor_caller import InterfloorCaller
 from caller.up_peak_caller import UpPeakCaller
 from caller.down_peak_caller import DownPeakCaller
+from benchmark_controller import generate_available_actions
+from dqn_controller import compute_avg_return
 import settings as s
 
 from tf_agents.environments import utils
@@ -26,53 +28,34 @@ from tf_agents.specs import tensor_spec
 from tf_agents.utils import common
 from copy import deepcopy
 import tensorflow as tf
+import numpy as np
 import pathlib
 import random
 import sys
 
-def generate_available_actions(num_elevators=s.NUM_ELEVATORS):
-    def helper(available_actions, accu, remaining_elevators):
-        if remaining_elevators == 0:
-            available_actions.append(accu)
-            return available_actions
-        
-        for action in ElevatorState:
-            helper(available_actions, deepcopy(accu) + [action], remaining_elevators-1)
-        return available_actions
-    return helper([], [], num_elevators)
-
-def compute_avg_return(environment, policy, num_episodes=10):
-    total_return = 0.0
-    for _ in range(num_episodes):
-        time_step = environment.reset()
-        episode_return = 0.0
-        while not time_step.is_last():
-            action_step = policy.action(time_step)
-            time_step = environment.step(action_step.action)
-            episode_return += time_step.reward
-        total_return += episode_return
-    avg_return = total_return / num_episodes
-    return avg_return.numpy()[0]
+# Code based on tf-agents documentation (https://www.tensorflow.org/agents/tutorials/6_reinforce_tutorial)
 
 def collect_episode(environment, policy, num_episodes):
+    # Collect episode trajectories to buffer
+    episode_counter = 0
+    environment.reset()
 
-  episode_counter = 0
-  environment.reset()
+    while episode_counter < num_episodes:
+        time_step = environment.current_time_step()
+        action_step = policy.action(time_step)
+        next_time_step = environment.step(action_step.action)
+        traj = trajectory.from_transition(time_step, action_step, next_time_step)
 
-  while episode_counter < num_episodes:
-    time_step = environment.current_time_step()
-    action_step = policy.action(time_step)
-    next_time_step = environment.step(action_step.action)
-    traj = trajectory.from_transition(time_step, action_step, next_time_step)
+        # Add trajectory to the replay buffer
+        replay_buffer.add_batch(traj)
 
-    # Add trajectory to the replay buffer
-    replay_buffer.add_batch(traj)
-
-    if traj.is_boundary():
-      episode_counter += 1
+        if traj.is_boundary():
+            episode_counter += 1
 
 if __name__ == '__main__':
     random.seed(s.RANDOM_SEED)
+    tf.random.set_seed(s.RANDOM_SEED)
+    np.random.seed(s.RANDOM_SEED)
 
     with tf.device("/GPU:0"):
     #with tf.device("/CPU:0"):
@@ -86,11 +69,6 @@ if __name__ == '__main__':
         eval_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions())
         train_env = tf_py_environment.TFPyEnvironment(train_py_building)
         eval_env = tf_py_environment.TFPyEnvironment(eval_py_building)
-        #env_name = 'CartPole-v0'
-        #train_py_env = suite_gym.load(env_name)
-        #eval_py_env = suite_gym.load(env_name)
-        #train_env = tf_py_environment.TFPyEnvironment(train_py_env)
-        #eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 
         # Network and agent initialization
         actor_net = actor_distribution_network.ActorDistributionNetwork(
@@ -147,7 +125,7 @@ if __name__ == '__main__':
                 s.REINFORCE_COLLECT_EPISODES_PER_ITERATION
             )
 
-            # Use data from the buffer and update the agent's network.
+            # Use data from the buffer and update the agent's network
             experience = replay_buffer.gather_all()
             train_loss = agent.train(experience)
             replay_buffer.clear()

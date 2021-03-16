@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import settings as s
 
 class Agent(ABC):
+    """Abstract agent class that controllers can program against."""
     def __init__(self, elevators=s.NUM_ELEVATORS):
         self.elevators = elevators
 
