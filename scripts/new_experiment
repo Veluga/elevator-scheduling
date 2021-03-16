@@ -5,12 +5,17 @@ if [[ -z "$1" ]]; then
     exit 1
 fi
 
+if [[ -z "$2" ]]; then
+    echo "Require name of controller to be used."
+    exit 1
+fi
+
 LATEST=$(ls -t experiments | head -n1 | sed 's/\([0-9]*\).*/\1/g')
 LATEST=$((LATEST + 1))
 DIRNAME="./experiments/${LATEST}_$1"
 mkdir "$DIRNAME"
 
-cp tf_controller.py "$DIRNAME"
+cp "$2" "$DIRNAME"
 cp -r agent "$DIRNAME"
 cp -r building "$DIRNAME"
 cp -r caller "$DIRNAME"
@@ -22,4 +27,4 @@ touch "${DIRNAME}/model_log.txt"
 
 vim "${DIRNAME}/settings.py"
 
-python "${DIRNAME}/tf_controller.py" &> "${DIRNAME}/model_log.txt" &
+python "${DIRNAME}/$2" &> "${DIRNAME}/model_log.txt" &

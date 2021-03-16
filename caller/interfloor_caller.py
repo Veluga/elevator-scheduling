@@ -2,7 +2,7 @@ import settings as s
 from .caller import Caller
 from random import randint
 
-class ContinuousRandomCallCaller(Caller):
+class InterfloorCaller(Caller):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
