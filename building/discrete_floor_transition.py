@@ -7,8 +7,10 @@ class DiscreteFloorTransition(Building):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.reset()
+        self._generated_calls = 0
 
     def call(self, call_floor, destination_floor):
+        self._generated_calls += 1
         if call_floor < destination_floor:
             self.up_calls[call_floor].add(destination_floor)
         else:
@@ -75,7 +77,7 @@ class DiscreteFloorTransition(Building):
 
             # Check whether passengers disembarking
             if elevator.cur_floor in elevator.buttons_pressed:
-                rewards[-1] += 2
+                rewards[-1] += s.REWARD_DELIVERED_PASSENGER
                 elevator.buttons_pressed.remove(elevator.cur_floor)
         return self.total_waiting_cost()
     

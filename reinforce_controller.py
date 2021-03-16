@@ -1,7 +1,7 @@
 from building.tf_building import TFBuilding
 from building.building import ElevatorState
 from building.discrete_floor_transition import DiscreteFloorTransition
-from caller.continuous_random_call import ContinuousRandomCallCaller
+from caller.interfloor_caller import InterfloorCaller
 from caller.up_peak_caller import UpPeakCaller
 from caller.down_peak_caller import DownPeakCaller
 import settings as s
@@ -79,7 +79,7 @@ if __name__ == '__main__':
         tf.compat.v1.enable_v2_behavior()
         
         # Building initialization
-        caller = ContinuousRandomCallCaller()
+        caller = InterfloorCaller()
         #caller = UpPeakCaller()
         #caller = DownPeakCaller()
         train_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions())
