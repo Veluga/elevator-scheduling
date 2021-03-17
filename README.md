@@ -11,6 +11,7 @@ Includes example agent implementations for:
 * Heuristic benchmarks
   * FCFS Round Robin
   * Random Policy
+  * (Static) Zoning
 
 Call generating policies implemented include:
 * Pure up-peak traffic
