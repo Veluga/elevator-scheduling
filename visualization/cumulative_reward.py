@@ -13,5 +13,6 @@ class CumulativeReward(Visualization):
 
     def display(self):
         # Plot using matplotlib
-        plt.plot(range(len(self.cumulative_rewards)), self.cumulative_rewards, 'r-')
-        plt.show()
+        #plt.plot(range(len(self.cumulative_rewards)), self.cumulative_rewards, 'r-')
+        #plt.show()
+        print(self.cumulative_reward)

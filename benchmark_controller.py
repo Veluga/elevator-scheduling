@@ -4,6 +4,7 @@ from building.discrete_floor_transition import ElevatorState
 import settings as s
 
 import numpy as np
+import random
 
 
 def generate_available_actions(num_elevators=s.NUM_ELEVATORS):
@@ -47,8 +48,8 @@ class Controller:
             self.visualization.display()
 
 if __name__ == "__main__":
-    random.seed(s.RANDOM_SEED)
-    np.random.seed(s.RANDOM_SEED)
+    #random.seed(s.RANDOM_SEED)
+    #np.random.seed(s.RANDOM_SEED)
 
     from caller.interfloor_caller import InterfloorCaller
     from caller.up_peak_caller import UpPeakCaller
@@ -56,20 +57,22 @@ if __name__ == "__main__":
     from building.discrete_floor_transition import DiscreteFloorTransition, ElevatorState
     from agent.random_policy import RandomPolicyAgent
     from agent.round_robin import RoundRobinAgent
+    from agent.static_zoning import StaticZoningAgent
 
     from visualization.average_reward import AverageReward
     from visualization.cumulative_reward import CumulativeReward
 
-    caller = InterfloorCaller()
-    #caller = UpPeakCaller()
+    #caller = InterfloorCaller()
+    caller = UpPeakCaller()
     #caller = DownPeakCaller()
     
     building = DiscreteFloorTransition(caller)
     
     available_actions = generate_available_actions()
     
-    agent = RandomPolicyAgent(available_actions)
+    #agent = RandomPolicyAgent(available_actions)
     #agent = RoundRobinAgent()
+    agent = StaticZoningAgent()
     
     #viz = AverageReward(sliding_window_size=100)
     viz = CumulativeReward()
