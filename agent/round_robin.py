@@ -22,7 +22,7 @@ class RoundRobinAgent(Agent):
         return new_calls
 
     def _button_press_in_direction(self, elevator):
-        """Determine whether any button press in direction of traveln remains.
+        """Determine whether any button press in direction of travel remains.
         An elevator must continue travelling in its current direction if there are
         unserved button presses in the direction of travel (i.e. it cannot reverse to pick up
         passengers in the opposite direction).

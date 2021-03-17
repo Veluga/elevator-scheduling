@@ -11,4 +11,5 @@ class RandomPolicyAgent(Agent):
         return self.available_actions[randint(0, len(self.available_actions)-1)]
 
     def perform_update(self, state, action, reward, new_state):
+        """Unused for benchmark agent that doesn't learn from experience."""
         pass
