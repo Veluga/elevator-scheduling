@@ -4,8 +4,8 @@ from copy import deepcopy
 from collections import deque
 import settings as s
 
-class RoundRobinAgent(BenchmarkAgent):
-    """Agent that implements a FCFS Round Robin scheduler."""
+class UpPeakGES(BenchmarkAgent):
+    """Agent that implements a round robin scheduler that returns cars to ground floor when unused."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.handling_elevator = 0
@@ -16,6 +16,9 @@ class RoundRobinAgent(BenchmarkAgent):
             self.elevator_queues[self.handling_elevator].append(floor)
             self.handling_elevator = (self.handling_elevator+1) % s.NUM_ELEVATORS
 
-    def handle_unused(self, *args):
-        # Transition to idle state
-        return ElevatorState.STOPPED
+    def handle_unused(self, _, elevator):
+        # Return to ground floor
+        if elevator.cur_floor == 0:
+            return ElevatorState.STOPPED
+        else:
+            return ElevatorState.DESCENDING
