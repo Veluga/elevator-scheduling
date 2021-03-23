@@ -58,7 +58,7 @@ if __name__ == "__main__":
     from agent.random_policy import RandomPolicyAgent
     from agent.round_robin import RoundRobinAgent
     from agent.static_zoning import StaticZoningAgent
-    from agent.up_peak_ges import UpPeakGES
+    from agent.up_peak_scheduler import UpPeakScheduler
 
     from visualization.average_reward import AverageReward
     from visualization.cumulative_reward import CumulativeReward
@@ -72,9 +72,9 @@ if __name__ == "__main__":
     available_actions = generate_available_actions()
     
     #agent = RandomPolicyAgent(available_actions)
-    agent = RoundRobinAgent()
+    #agent = RoundRobinAgent()
     #agent = StaticZoningAgent()
-    #agent = UpPeakGES()
+    agent = UpPeakScheduler()
     
     #viz = AverageReward(sliding_window_size=100)
     viz = CumulativeReward()

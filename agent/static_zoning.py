@@ -23,11 +23,16 @@ class StaticZoningAgent(BenchmarkAgent):
             num_floors -= floors_to_serve
         return serving_floors
 
-    def assign_calls(self, new_calls):
-        for floor in new_calls:
+    def assign_calls(self, new_up_calls, new_down_calls):
+        for floor in new_up_calls:
             for idx, (zone_min, zone_max) in enumerate(self.zones):
                 if floor < zone_max:
-                    self.elevator_queues[idx].append(floor)
+                    self.elevator_up_queues[idx].append(floor)
+                    break
+        for floor in new_down_calls:
+            for idx, (zone_min, zone_max) in enumerate(self.zones):
+                if floor < zone_max:
+                    self.elevator_down_queues[idx].append(floor)
                     break
 
     def handle_unused(self, idx, elevator):

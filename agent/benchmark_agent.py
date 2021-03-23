@@ -5,7 +5,44 @@ import settings as s
 from collections import deque
 from copy import deepcopy
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
+
+@dataclass
+class Call:
+    floor: int 
+    t_wait: int
+
+class ElevatorQueue:
+    def __init__(self):
+        self.q = deque()
+    
+    def append(self, floor):
+        self.q.append(Call(floor, 0))
+
+    def increase_waiting_times(self):
+        for call in self.q:
+            call.t_wait += s.TICK_LENGTH_IN_SECONDS
+    
+    def remove(self, floor):
+        to_remove = []
+        for call in self.q:
+            if call.floor == floor:
+                to_remove.append(call)
+        for call in to_remove:
+            self.q.remove(call)
+
+    def __len__(self):
+        return len(self.q)
+
+    def __getitem__(self, key):
+        return self.q[key]
+
+    def __contains__(self, floor):
+        for call in self.q:
+            if call.floor == floor:
+                return True
+        return False
 
 class BenchmarkAgent(Agent, ABC):
     """Agent that implements a zoning strategy whereby every car serves only a set of neighbouring floors.
@@ -15,15 +52,20 @@ class BenchmarkAgent(Agent, ABC):
         super().__init__(*args, **kwargs)
         self.prev_up_calls = {floor_num: set() for floor_num in range(s.NUM_FLOORS)}
         self.prev_down_calls = {floor_num: set() for floor_num in range(s.NUM_FLOORS)}
-        self.elevator_queues = [deque() for _ in range(s.NUM_ELEVATORS)]
+        
+        self.elevator_up_queues = [ElevatorQueue() for _ in range(s.NUM_ELEVATORS)]
+        self.elevator_down_queues = [ElevatorQueue() for _ in range(s.NUM_ELEVATORS)]
 
     def _get_new_calls(self, up_calls, down_calls):
         """Compare current state of calls against previous state to detect new calls"""
-        new_calls = set()
-        for f in range(s.NUM_FLOORS):
-            if up_calls[f] - self.prev_up_calls[f] or down_calls[f] - self.prev_down_calls[f]:
-                new_calls.add(f)
-        return new_calls
+        new_up_calls = set()
+        new_down_calls = set()
+        for floor in range(s.NUM_FLOORS):
+            if up_calls[floor] - self.prev_up_calls[floor] != set():
+                new_up_calls.add(floor)
+            if down_calls[floor] - self.prev_down_calls[floor] != set():
+                new_down_calls.add(floor)
+        return new_up_calls, new_down_calls
 
     def _button_press_in_direction(self, elevator):
         """Determine whether any button press in direction of travel remains.
@@ -37,7 +79,7 @@ class BenchmarkAgent(Agent, ABC):
             return any(bp < elevator.cur_floor for bp in elevator.buttons_pressed)
 
     @abstractmethod
-    def assign_calls(self, new_calls):
+    def assign_calls(self, new_up_calls, new_down_calls):
         pass
 
     @abstractmethod
@@ -45,8 +87,11 @@ class BenchmarkAgent(Agent, ABC):
         pass
 
     def get_action(self, state):
-        new_calls = self._get_new_calls(state['up_calls'], state['down_calls'])
-        self.assign_calls(new_calls)
+        for q in self.elevator_up_queues + self.elevator_down_queues:
+            q.increase_waiting_times()
+
+        new_up_calls, new_down_calls = self._get_new_calls(state['up_calls'], state['down_calls'])
+        self.assign_calls(new_up_calls, new_down_calls)
 
         # Preserve current state
         self.prev_up_calls = deepcopy(state['up_calls'])
@@ -54,11 +99,17 @@ class BenchmarkAgent(Agent, ABC):
 
         actions = []
         for idx, elevator in enumerate(state['elevators']):
-            if elevator.cur_floor in self.elevator_queues[idx]:
-                # Must let passenger board
+            if (elevator.direction == ElevatorState.ASCENDING or elevator.cur_floor == 0 or elevator.empty()) \
+            and elevator.cur_floor in self.elevator_up_queues[idx]:
+                # Must let ascending passenger board
                 actions.append(ElevatorState.STOPPED)
-                self.elevator_queues[idx].remove(elevator.cur_floor)
+                self.elevator_up_queues[idx].remove(elevator.cur_floor)
                 self.prev_up_calls[elevator.cur_floor] = set()
+            elif (elevator.direction == ElevatorState.DESCENDING or elevator.cur_floor == s.NUM_FLOORS-1 or elevator.empty()) \
+            and elevator.cur_floor in self.elevator_down_queues[idx]:
+                # Must let descending passenger board
+                actions.append(ElevatorState.STOPPED)
+                self.elevator_down_queues[idx].remove(elevator.cur_floor)
                 self.prev_down_calls[elevator.cur_floor] = set()
             elif elevator.cur_floor in elevator.buttons_pressed:
                 # Passengers must be allowed to disembark
@@ -73,12 +124,13 @@ class BenchmarkAgent(Agent, ABC):
                     if elevator.direction == ElevatorState.DESCENDING
                     else ElevatorState.DESCENDING
                 )
-            elif len(self.elevator_queues[idx]) > 0:
+            elif len(self.elevator_up_queues[idx]) > 0 or len(self.elevator_down_queues[idx]) > 0:
                 # Pick up passengers waiting in hall, serve call
-                pickup_floor = self.elevator_queues[idx][0]
+                oldest_call_up = self.elevator_up_queues[idx][0] if len(self.elevator_up_queues[idx]) > 0 else Call(0, float('-inf'))
+                oldest_call_down = self.elevator_down_queues[idx][0] if len(self.elevator_down_queues[idx]) > 0 else Call(0, float('-inf'))
                 actions.append(
                     ElevatorState.ASCENDING
-                    if elevator.cur_floor < pickup_floor
+                    if elevator.cur_floor < (oldest_call_up.floor if oldest_call_up.t_wait > oldest_call_down.t_wait else oldest_call_down.floor)
                     else ElevatorState.DESCENDING
                 )
             else:
@@ -90,3 +142,8 @@ class BenchmarkAgent(Agent, ABC):
     def perform_update(self, state, action, reward, new_state):
         """Unused for benchmark agent that doesn't learn from experience."""
         pass
+
+
+# So basically there is a bug that heavily affects down/up peak traffic but not the interfloor traffic
+# Elevators turn empty, the queues get emptied (although there are waiting calls), and the elevators go into idle mode
+# You must find out why.

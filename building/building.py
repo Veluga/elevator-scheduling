@@ -46,3 +46,6 @@ class Elevator:
         self.state = ElevatorState.STOPPED
         self.buttons_pressed = set()
         self.direction = direction
+
+    def empty(self):
+        return len(self.buttons_pressed) == 0
