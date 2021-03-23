@@ -10,7 +10,7 @@ class RoundRobinAgent(BenchmarkAgent):
         super().__init__(*args, **kwargs)
         self.handling_elevator = 0
 
-    def assign_calls(self, new_up_calls, new_down_calls):
+    def assign_calls(self, new_up_calls, new_down_calls, elevators=None):
         for floor in new_up_calls:
             # Assign new call to elevator in round robin fashion
             self.elevator_up_queues[self.handling_elevator].append(floor)

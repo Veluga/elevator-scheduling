@@ -24,7 +24,7 @@ class StaticZoningAgent(BenchmarkAgent):
             num_floors -= floors_to_serve
         return serving_floors
 
-    def assign_calls(self, new_up_calls, new_down_calls):
+    def assign_calls(self, new_up_calls, new_down_calls, elevators=None):
         """Calls will be assigned to elevator that serves zone which contains the source floor."""
         for floor in new_up_calls:
             for idx, (zone_min, zone_max) in enumerate(self.zones):

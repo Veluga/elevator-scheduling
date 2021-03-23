@@ -89,6 +89,15 @@ class BenchmarkAgent(Agent, ABC):
     def handle_unused(self, idx, elevator):
         """Derived classes must decide what unused (no boarded/waiting passengers) elevators should do."""
         pass
+    
+    def handle_waiting(self, idx, elevator):
+        # Pick up passengers waiting in hall, serving oldest call (FCFS)
+        oldest_call_up = self.elevator_up_queues[idx][0] if len(self.elevator_up_queues[idx]) > 0 else Call(0, float('-inf'))
+        oldest_call_down = self.elevator_down_queues[idx][0] if len(self.elevator_down_queues[idx]) > 0 else Call(0, float('-inf'))
+        if elevator.cur_floor < (oldest_call_up.floor if oldest_call_up.t_wait > oldest_call_down.t_wait else oldest_call_down.floor):
+            return ElevatorState.ASCENDING
+        else:
+            return ElevatorState.DESCENDING
 
     def get_action(self, state):
         """Template method that handles common elevator logic (e.g. elevators must continue in direction of
@@ -102,7 +111,7 @@ class BenchmarkAgent(Agent, ABC):
 
         # Deduce newly generated calls from previous/current state comparison
         new_up_calls, new_down_calls = self._get_new_calls(state['up_calls'], state['down_calls'])
-        self.assign_calls(new_up_calls, new_down_calls)
+        self.assign_calls(new_up_calls, new_down_calls, state['elevators'])
 
         # Preserve current state
         self.prev_up_calls = deepcopy(state['up_calls'])
@@ -129,21 +138,15 @@ class BenchmarkAgent(Agent, ABC):
                 # Continue travelling in direction
                 actions.append(elevator.direction)
             elif len(elevator.buttons_pressed) > 0:
-                # Invert direction to serve boarded passengers before picking up new passengers (FCFS)
+                # Invert direction to serve boarded passengers before picking up new passengers
                 actions.append(
                     ElevatorState.ASCENDING
                     if elevator.direction == ElevatorState.DESCENDING
                     else ElevatorState.DESCENDING
                 )
             elif len(self.elevator_up_queues[idx]) > 0 or len(self.elevator_down_queues[idx]) > 0:
-                # Pick up passengers waiting in hall, serve call
-                oldest_call_up = self.elevator_up_queues[idx][0] if len(self.elevator_up_queues[idx]) > 0 else Call(0, float('-inf'))
-                oldest_call_down = self.elevator_down_queues[idx][0] if len(self.elevator_down_queues[idx]) > 0 else Call(0, float('-inf'))
-                actions.append(
-                    ElevatorState.ASCENDING
-                    if elevator.cur_floor < (oldest_call_up.floor if oldest_call_up.t_wait > oldest_call_down.t_wait else oldest_call_down.floor)
-                    else ElevatorState.DESCENDING
-                )
+                action = self.handle_waiting(idx, elevator)
+                actions.append(action) 
             else:
                 # No boarded passengers, no passengers in queue
                 action = self.handle_unused(idx, elevator)
