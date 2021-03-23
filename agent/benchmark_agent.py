@@ -10,10 +10,12 @@ from dataclasses import dataclass
 
 @dataclass
 class Call:
+    """Stores information about calls that is relevant for schedulers."""
     floor: int 
     t_wait: int
 
 class ElevatorQueue:
+    """Thin wrapper of deque to make code in `get_action` of `BenchmarkAgent` cleaner."""
     def __init__(self):
         self.q = deque()
     
@@ -80,16 +82,25 @@ class BenchmarkAgent(Agent, ABC):
 
     @abstractmethod
     def assign_calls(self, new_up_calls, new_down_calls):
+        """Derived classes must decide how to delegate calls to elevators."""
         pass
 
     @abstractmethod
     def handle_unused(self, idx, elevator):
+        """Derived classes must decide what unused (no boarded/waiting passengers) elevators should do."""
         pass
 
     def get_action(self, state):
+        """Template method that handles common elevator logic (e.g. elevators must continue in direction of
+        travel until all button presses in direction have been served).
+        Delegates benchmark specific behaviour via `assign_calls` and `handle_unused` methods.
+        Called in loop of `benchmark_controller`.
+        """
+        # Increase waiting time of all passengers in hall (i.e. unserved calls)
         for q in self.elevator_up_queues + self.elevator_down_queues:
             q.increase_waiting_times()
 
+        # Deduce newly generated calls from previous/current state comparison
         new_up_calls, new_down_calls = self._get_new_calls(state['up_calls'], state['down_calls'])
         self.assign_calls(new_up_calls, new_down_calls)
 
@@ -142,8 +153,3 @@ class BenchmarkAgent(Agent, ABC):
     def perform_update(self, state, action, reward, new_state):
         """Unused for benchmark agent that doesn't learn from experience."""
         pass
-
-
-# So basically there is a bug that heavily affects down/up peak traffic but not the interfloor traffic
-# Elevators turn empty, the queues get emptied (although there are waiting calls), and the elevators go into idle mode
-# You must find out why.

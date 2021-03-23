@@ -14,6 +14,7 @@ class StaticZoningAgent(BenchmarkAgent):
         self.zones = self._calculate_zones()
 
     def _calculate_zones(self, num_floors=s.NUM_FLOORS, num_elevators=s.NUM_ELEVATORS):
+        """Divide building into `num_elevators` zones and assign them to the elevators."""
         serving_floors = []
         from_ = 0
         for i in range(num_elevators):
@@ -24,6 +25,7 @@ class StaticZoningAgent(BenchmarkAgent):
         return serving_floors
 
     def assign_calls(self, new_up_calls, new_down_calls):
+        """Calls will be assigned to elevator that serves zone which contains the source floor."""
         for floor in new_up_calls:
             for idx, (zone_min, zone_max) in enumerate(self.zones):
                 if floor < zone_max:
