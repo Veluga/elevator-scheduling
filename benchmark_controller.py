@@ -54,7 +54,10 @@ if __name__ == "__main__":
     from caller.interfloor_caller import InterfloorCaller
     from caller.up_peak_caller import UpPeakCaller
     from caller.down_peak_caller import DownPeakCaller
+    from caller.mixed_caller import MixedCaller
+
     from building.discrete_floor_transition import DiscreteFloorTransition, ElevatorState
+
     from agent.random_policy import RandomPolicyAgent
     from agent.round_robin import RoundRobinAgent
     from agent.static_zoning import StaticZoningAgent
@@ -65,8 +68,9 @@ if __name__ == "__main__":
     from visualization.cumulative_reward import CumulativeReward
 
     #caller = InterfloorCaller()
-    caller = UpPeakCaller()
+    #caller = UpPeakCaller()
     #caller = DownPeakCaller()
+    caller = MixedCaller()
     
     building = DiscreteFloorTransition(caller)
     
@@ -79,9 +83,26 @@ if __name__ == "__main__":
     agent = NearestCarScheduler()
     
     #viz = AverageReward(sliding_window_size=100)
-    viz = CumulativeReward()
-    #viz = None
+    #viz = CumulativeReward()
+    viz = None
 
     ctrl = Controller(building, agent, visualization=viz, timesteps=3600)
     ctrl.run()
-    print("Delivered Passengers: {}%".format(ctrl.visualization.cumulative_reward / 2 / building._generated_calls))
+    print("Delivered passengers: {}%".format(
+        len([p for p in ctrl.building.passengers.values() if p.served]) / len(ctrl.building.passengers.values()) * 100
+    ))
+    print("Average waiting time: {}".format(
+        sum([p.waiting_time for p in ctrl.building.passengers.values()]) / len([p for p in ctrl.building.passengers.values() if p.served])
+    ))
+    print("Squared average waiting time: {}".format(
+        sum([p.waiting_time**2 for p in ctrl.building.passengers.values()]) / len([p for p in ctrl.building.passengers.values() if p.served])
+    ))
+    print("Average system time: {}".format(
+        sum([p.system_time for p in ctrl.building.passengers.values()]) / len([p for p in ctrl.building.passengers.values() if p.served])
+    ))
+    print("Squared average system time: {}".format(
+        sum([p.system_time**2 for p in ctrl.building.passengers.values()]) / len([p for p in ctrl.building.passengers.values() if p.served])
+    ))
+    print(">60 seconds waiting time: {}%".format(
+        len([p for p in ctrl.building.passengers.values() if p.waiting_time > 60]) / len(ctrl.building.passengers) * 100
+    ))

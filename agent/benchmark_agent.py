@@ -120,13 +120,15 @@ class BenchmarkAgent(Agent, ABC):
         actions = []
         for idx, elevator in enumerate(state['elevators']):
             if (elevator.direction == ElevatorState.ASCENDING or elevator.cur_floor == 0 or elevator.empty()) \
-            and elevator.cur_floor in self.elevator_up_queues[idx]:
+            and elevator.cur_floor in self.elevator_up_queues[idx] \
+            and not elevator.full():
                 # Must let ascending passenger board
                 actions.append(ElevatorState.STOPPED)
                 self.elevator_up_queues[idx].remove(elevator.cur_floor)
                 self.prev_up_calls[elevator.cur_floor] = set()
             elif (elevator.direction == ElevatorState.DESCENDING or elevator.cur_floor == s.NUM_FLOORS-1 or elevator.empty()) \
-            and elevator.cur_floor in self.elevator_down_queues[idx]:
+            and elevator.cur_floor in self.elevator_down_queues[idx] \
+            and not elevator.full():
                 # Must let descending passenger board
                 actions.append(ElevatorState.STOPPED)
                 self.elevator_down_queues[idx].remove(elevator.cur_floor)
