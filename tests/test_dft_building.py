@@ -27,9 +27,8 @@ def test_call(building):
     building.call(0, 1)
     building.call(4, 3)
 
-    assert building._generated_calls == 2
-    assert building.up_calls[0] == set([1])
-    assert building.down_calls[4] == set([3])
+    assert len(building.up_calls[0]) == 1
+    assert len(building.down_calls[4]) == 1
 
 def test_sample_state(building):
     building.reset()
@@ -44,9 +43,9 @@ def test_sample_state(building):
     assert np.all(state_vector[NUM_FLOORS:NUM_FLOORS*2] == [0, 1] + [0] * (NUM_FLOORS-2))
     
     assert len(state_dict) == 3
-    assert state_dict['up_calls'] == building.up_calls
-    assert state_dict['down_calls'] == building.down_calls
-    assert state_dict['elevators'] == building.elevators
+    assert len(state_dict['up_calls']) == len(building.up_calls)
+    assert len(state_dict['down_calls']) == len(building.down_calls)
+    assert len(state_dict['elevators']) == len(building.elevators)
 
     for elevator in building.elevators:
         elevator.cur_floor = NUM_FLOORS-1
