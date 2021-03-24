@@ -23,7 +23,7 @@ cp -r agent "$DIRNAME"
 cp -r building "$DIRNAME"
 cp -r caller "$DIRNAME"
 cp settings.py "$DIRNAME"
-cp controller.py "$DIRNAME"
+cp benchmark_controller.py "$DIRNAME"
 
 mkdir "${DIRNAME}/weights"
 mkdir "${DIRNAME}/plots"
