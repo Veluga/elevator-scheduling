@@ -4,6 +4,7 @@ from building.discrete_floor_transition import DiscreteFloorTransition
 from caller.interfloor_caller import InterfloorCaller
 from caller.up_peak_caller import UpPeakCaller
 from caller.down_peak_caller import DownPeakCaller
+from caller.mixed_caller import MixedCaller
 from benchmark_controller import generate_available_actions
 from dqn_controller import compute_avg_return
 import settings as s
@@ -62,9 +63,10 @@ if __name__ == '__main__':
         tf.compat.v1.enable_v2_behavior()
         
         # Building initialization
-        caller = InterfloorCaller()
+        #caller = InterfloorCaller()
         #caller = UpPeakCaller()
         #caller = DownPeakCaller()
+        caller = MixedCaller()
         train_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions())
         eval_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions())
         train_env = tf_py_environment.TFPyEnvironment(train_py_building)

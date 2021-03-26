@@ -67,20 +67,20 @@ if __name__ == "__main__":
     from visualization.average_reward import AverageReward
     from visualization.cumulative_reward import CumulativeReward
 
-    #caller = InterfloorCaller()
+    caller = InterfloorCaller()
     #caller = UpPeakCaller()
     #caller = DownPeakCaller()
-    caller = MixedCaller()
+    #caller = MixedCaller()
     
     building = DiscreteFloorTransition(caller)
     
     available_actions = generate_available_actions()
     
-    #agent = RandomPolicyAgent(available_actions)
+    agent = RandomPolicyAgent(available_actions)
     #agent = RoundRobinAgent()
     #agent = StaticZoningAgent()
     #agent = UpPeakScheduler()
-    agent = NearestCarScheduler()
+    #agent = NearestCarScheduler()
     
     #viz = AverageReward(sliding_window_size=100)
     #viz = CumulativeReward()
@@ -106,3 +106,4 @@ if __name__ == "__main__":
     print(">60 seconds waiting time: {}%".format(
         len([p for p in ctrl.building.passengers.values() if p.waiting_time > 60]) / len(ctrl.building.passengers) * 100
     ))
+    print("Total reward collected: {}".format(ctrl.building._total_reward))
