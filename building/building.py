@@ -2,7 +2,6 @@ import settings as s
 from abc import ABC, abstractmethod
 from caller.caller import Call
 from enum import IntEnum
-from dataclasses import dataclass
 import uuid
 
 class Building(ABC):
@@ -40,7 +39,6 @@ class ElevatorState(IntEnum):
     DESCENDING = 2
 
 
-@dataclass
 class Elevator:
     """Class that holds information about a single elevator."""
     def __init__(self, cur_floor=0, direction=ElevatorState.ASCENDING, max_capacity=s.ELEVATOR_MAX_CAPACITY):
