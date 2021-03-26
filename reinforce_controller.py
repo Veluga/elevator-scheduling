@@ -58,8 +58,8 @@ if __name__ == '__main__':
     tf.random.set_seed(s.RANDOM_SEED)
     np.random.seed(s.RANDOM_SEED)
 
-    with tf.device("/GPU:0"):
-    #with tf.device("/CPU:0"):
+    #with tf.device("/GPU:0"):
+    with tf.device("/CPU:0"):
         tf.compat.v1.enable_v2_behavior()
         
         # Building initialization
