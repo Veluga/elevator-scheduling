@@ -134,5 +134,5 @@ if __name__ == '__main__':
                 print('{{"metric": "avg_return", "value": {}, "step": {}}}'.format(avg_return, step))
                 sys.stdout.flush()
 
-            if step % s.DQN_POLICY_SAVER_INTERVAL == 0:
+            if step % s.CDQN_POLICY_SAVER_INTERVAL == 0:
                 saver.save(weights_dir + 'policy_{}'.format(step))

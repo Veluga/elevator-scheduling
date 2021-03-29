@@ -67,17 +67,17 @@ if __name__ == "__main__":
     from visualization.average_reward import AverageReward
     from visualization.cumulative_reward import CumulativeReward
 
-    caller = InterfloorCaller()
+    #caller = InterfloorCaller()
     #caller = UpPeakCaller()
     #caller = DownPeakCaller()
-    #caller = MixedCaller()
+    caller = MixedCaller()
     
-    building = DiscreteFloorTransition(caller)
+    building = DiscreteFloorTransition(caller, track_passengers=True)
     
     available_actions = generate_available_actions()
     
-    agent = RandomPolicyAgent(available_actions)
-    #agent = RoundRobinAgent()
+    #agent = RandomPolicyAgent(available_actions)
+    agent = RoundRobinAgent()
     #agent = StaticZoningAgent()
     #agent = UpPeakScheduler()
     #agent = NearestCarScheduler()
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     #viz = CumulativeReward()
     viz = None
 
-    ctrl = Controller(building, agent, visualization=viz, timesteps=3600)
+    ctrl = Controller(building, agent, visualization=viz, timesteps=s.EPISODE_LENGTH)
     ctrl.run()
     print("Delivered passengers: {}%".format(
         len([p for p in ctrl.building.passengers.values() if p.served]) / len(ctrl.building.passengers.values()) * 100

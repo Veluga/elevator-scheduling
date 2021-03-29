@@ -25,7 +25,7 @@ available_actions = generate_available_actions()
 #caller = UpPeakCaller()
 caller = MixedCaller()
 
-eval_py_building = TFBuilding(DiscreteFloorTransition(caller), available_actions)
+eval_py_building = TFBuilding(DiscreteFloorTransition(caller, track_passengers=True), available_actions)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_building)
 
 # Restore policy
