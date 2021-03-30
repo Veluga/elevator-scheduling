@@ -126,7 +126,8 @@ if __name__ == '__main__':
         iterator = iter(dataset)
 
         # Enable continuous saving of policies
-        saver = PolicySaver(agent.collect_policy, batch_size=None)
+        policy_saver = PolicySaver(agent.policy, batch_size=None)
+        collect_policy_saver = PolicySaver(agent.collect_policy, batch_size=None)
         weights_dir = str(pathlib.Path(__file__).parent.absolute()) + "/weights/"
 
         for _ in range(s.NUM_ITERATIONS):
@@ -154,4 +155,5 @@ if __name__ == '__main__':
                 sys.stdout.flush()
 
             if step % s.DQN_POLICY_SAVER_INTERVAL == 0:
-                saver.save(weights_dir + 'policy_{}'.format(step))
+                policy_saver.save(weights_dir + 'policy_{}'.format(step))
+                collect_policy_saver.save(weights_dir + 'collect_policy_{}'.format(step))
