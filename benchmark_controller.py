@@ -63,24 +63,26 @@ if __name__ == "__main__":
     from agent.static_zoning import StaticZoningAgent
     from agent.up_peak_scheduler import UpPeakScheduler
     from agent.nearest_car import NearestCarScheduler
+    from agent.eta_agent import ETAAgent
 
     from visualization.average_reward import AverageReward
     from visualization.cumulative_reward import CumulativeReward
 
-    #caller = InterfloorCaller()
+    caller = InterfloorCaller()
     #caller = UpPeakCaller()
     #caller = DownPeakCaller()
-    caller = MixedCaller()
+    #caller = MixedCaller()
     
     building = DiscreteFloorTransition(caller, track_passengers=True)
     
     available_actions = generate_available_actions()
     
     #agent = RandomPolicyAgent(available_actions)
-    agent = RoundRobinAgent()
+    #agent = RoundRobinAgent()
     #agent = StaticZoningAgent()
     #agent = UpPeakScheduler()
     #agent = NearestCarScheduler()
+    agent = ETAAgent()
     
     #viz = AverageReward(sliding_window_size=100)
     #viz = CumulativeReward()
