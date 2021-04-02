@@ -4,3 +4,4 @@ venv
 experiments/*
 .DS_Store
 log.out
+ppo_data
