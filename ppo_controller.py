@@ -181,7 +181,7 @@ def train():
 
         while environment_steps_metric.result() < s.NUM_ITERATIONS:
             global_step_val = global_step.numpy()
-            if global_step_val % s.PPO_EVAL_INTERVAL == 0:
+            if global_step_val > 0 and global_step_val % s.PPO_EVAL_INTERVAL == 0:
                 start_time = time.time()
                 metric_utils.eager_compute(
                     eval_metrics,
@@ -192,17 +192,20 @@ def train():
                     summary_writer=eval_summary_writer,
                     summary_prefix='Metrics',
                 )
-                print("({}) The last training step took me {} seconds!".format(global_step_val, time.time() - start_time))
+                print("({}) The last eval step took me {} seconds!".format(global_step_val, time.time() - start_time))
+                sys.stdout.flush()
 
             start_time = time.time()
             collect_driver.run()
             print("({}) The last driver run took me {} seconds!".format(global_step_val, time.time() - start_time))
+            sys.stdout.flush()
             collect_time += time.time() - start_time
 
             start_time = time.time()
             total_loss, _ = train_step()
             replay_buffer.clear()
             print("({}) The last training step took me {} seconds!".format(global_step_val, time.time() - start_time))
+            sys.stdout.flush()
             train_time += time.time() - start_time
 
             for train_metric in train_metrics:
@@ -217,6 +220,7 @@ def train():
                 )
                 print('%.3f steps/sec', steps_per_sec)
                 print('collect_time = %.3f, train_time = %.3f', collect_time, train_time)
+                sys.stdout.flush()
                 with tf.compat.v2.summary.record_if(True):
                     tf.compat.v2.summary.scalar(
                         name='global_steps_per_sec', data=steps_per_sec, step=global_step

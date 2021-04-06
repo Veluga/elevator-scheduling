@@ -68,10 +68,10 @@ if __name__ == "__main__":
     from visualization.average_reward import AverageReward
     from visualization.cumulative_reward import CumulativeReward
 
-    caller = InterfloorCaller()
+    #caller = InterfloorCaller()
     #caller = UpPeakCaller()
     #caller = DownPeakCaller()
-    #caller = MixedCaller()
+    caller = MixedCaller()
     
     building = DiscreteFloorTransition(caller, track_passengers=True)
     
