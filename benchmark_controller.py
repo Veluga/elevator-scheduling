@@ -80,9 +80,9 @@ if __name__ == "__main__":
     #agent = RandomPolicyAgent(available_actions)
     #agent = RoundRobinAgent()
     #agent = StaticZoningAgent()
-    #agent = UpPeakScheduler()
+    agent = UpPeakScheduler()
     #agent = NearestCarScheduler()
-    agent = ETAAgent()
+    #agent = ETAAgent()
     
     #viz = AverageReward(sliding_window_size=100)
     #viz = CumulativeReward()

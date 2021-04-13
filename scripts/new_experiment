@@ -3,6 +3,9 @@
 # Generate new experiment with name $1, using controller $2
 # This will copy all relevant files to a new directory with name $1 in the experiments folder
 
+# Change this if your preferred editor is not vim
+EDITOR="vim"
+
 if [[ -z "$1" ]]; then
     echo "Require experiment name."
     exit 1
@@ -30,6 +33,6 @@ mkdir "${DIRNAME}/weights"
 mkdir "${DIRNAME}/plots"
 touch "${DIRNAME}/model_log.txt"
 
-vim "${DIRNAME}/settings.py"
+$EDITOR "${DIRNAME}/settings.py"
 
 python "${DIRNAME}/$2" &> "${DIRNAME}/model_log.txt" &
