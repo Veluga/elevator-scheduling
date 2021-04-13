@@ -1,3 +1,4 @@
 tf-agents
 tensorflow==2.4.*
 tensorforce
+pytest

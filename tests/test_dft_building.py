@@ -76,7 +76,10 @@ def test_ascending_from_top_floor_does_not_change_elevator_state(building):
     assert (prev_elevators[i] == new_elevators[i] for i in range(len(prev_elevators)))
 
 def test_picking_up_passenger(building):
+
     building.call(0, 1)
+    # Patch method to avoid automatically generated calls from interfering with test
+    building.call = lambda *args, **kwargs: None
     building.perform_action([ElevatorState.STOPPED] * NUM_ELEVATORS)
 
     assert all(building.up_calls[f] == set() for f in range(NUM_FLOORS))
