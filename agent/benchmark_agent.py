@@ -158,3 +158,29 @@ class BenchmarkAgent(Agent, ABC):
     def perform_update(self, state, action, reward, new_state):
         """Unused for benchmark agent that doesn't learn from experience."""
         pass
+
+def get_benchmark_agent(available_actions):
+    from .eta_agent import ETAAgent
+    from .nearest_car import NearestCarScheduler
+    from .random_policy import RandomPolicyAgent
+    from .round_robin import RoundRobinAgent
+    from .static_zoning import StaticZoningAgent
+    from .up_peak_scheduler import UpPeakScheduler
+
+
+    if s.BENCHMARK_AGENT_TYPE == "eta":
+        return ETAAgent()
+    elif s.BENCHMARK_AGENT_TYPE == "nc":
+        return NearestCarScheduler()
+    elif s.BENCHMARK_AGENT_TYPE == "rand":
+        return RandomPolicyAgent(available_actions)
+    elif s.BENCHMARK_AGENT_TYPE == "rr":
+        return RoundRobinAgent()
+    elif s.BENCHMARK_AGENT_TYPE == "sz":
+        return StaticZoningAgent()
+    elif s.BENCHMARK_AGENT_TYPE == "up":
+        return UpPeakScheduler()
+    
+    raise ValueError(
+        f"Unknown benchmark agent type: {s.BENCHMARK_AGENT_TYPE}\nMust be one of eta, nc, rand, rr, sz, and up."
+    )

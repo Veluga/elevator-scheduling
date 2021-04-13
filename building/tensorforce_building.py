@@ -1,5 +1,5 @@
 from .discrete_floor_transition import DiscreteFloorTransition
-from caller.mixed_caller import MixedCaller
+from caller.get_caller import get_caller
 from benchmark_controller import generate_available_actions
 import settings as s
 
@@ -9,7 +9,7 @@ class TensorforceEnvironment(Environment):
 
     def __init__(self):
         super().__init__()
-        caller = MixedCaller()
+        caller = get_caller()
         self._building = DiscreteFloorTransition(caller)
         self._state, _ = self._building.sample_state()
         self._available_actions = generate_available_actions()

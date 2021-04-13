@@ -94,13 +94,13 @@ def evaluate_individual(individual, building, available_actions):
 
 if __name__ == '__main__':
     from building.discrete_floor_transition import DiscreteFloorTransition
-    from caller.interfloor_caller import InterfloorCaller
+    from caller.get_caller import get_caller
     from benchmark_controller import generate_available_actions
 
     random.seed(s.RANDOM_SEED)
     np.random.seed(s.RANDOM_SEED)
 
-    caller = InterfloorCaller()
+    caller = get_caller()
     building = DiscreteFloorTransition(caller)
     
     state_vec, _ = building.sample_state()

@@ -1,7 +1,4 @@
-from caller.interfloor_caller import InterfloorCaller
-from caller.up_peak_caller import UpPeakCaller
-from caller.down_peak_caller import DownPeakCaller
-from caller.mixed_caller import MixedCaller
+from caller.get_caller import get_caller
 from building.tf_building import TFBuilding
 from building.building import ElevatorState
 from building.discrete_floor_transition import DiscreteFloorTransition
@@ -20,10 +17,7 @@ import sys
 available_actions = generate_available_actions()
 
 # Building initialization
-#caller = DownPeakCaller()
-#caller = InterfloorCaller()
-#caller = UpPeakCaller()
-caller = MixedCaller()
+caller = get_caller()
 
 eval_py_building = TFBuilding(DiscreteFloorTransition(caller, track_passengers=True), available_actions)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_building)
