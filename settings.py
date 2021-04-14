@@ -10,7 +10,7 @@ NUM_FLOORS = 10
 NUM_ELEVATORS = 4
 ELEVATOR_MAX_CAPACITY = 20
 # One of mixed, interfloor, up-peak, and down-peak (case sensitive)
-TRAFFIC_PROFILE = "interfloor"
+TRAFFIC_PROFILE = "mixed"
 
 # Benchmark agent config
 # Must be one of rr (Round Robin), rand (Random Policy), sz (Static Zoning), up (Up-Peak), nc (Nearest Car), and eta (ETA) 
@@ -59,6 +59,5 @@ ES_LOG_INTERVAL = 10000
 ES_NUM_EVAL_EPISODES = 3
 ES_EVAL_INTERVAL = 3
 ES_POLICY_SAVER_INTERVAL = ES_EVAL_INTERVAL
-
 POPULATION_SIZE = 50
 NOISE_STANDARD_DEVIATION = 0.1

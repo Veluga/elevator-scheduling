@@ -5,7 +5,7 @@ import settings as s
 
 from tensorforce import Environment
 
-class TensorforceEnvironment(Environment):
+class TensorforceBuilding(Environment):
 
     def __init__(self):
         super().__init__()

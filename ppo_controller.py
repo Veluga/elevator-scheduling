@@ -1,11 +1,12 @@
-from building.tensorforce_building import TensorforceEnvironment
+from building.tensorforce_building import TensorforceBuilding
 import settings as s
+
 
 from tensorforce import Runner, Environment
 
 def main():
     environment = Environment.create(
-        environment=TensorforceEnvironment, max_episode_timesteps=3600
+        environment=TensorforceBuilding, max_episode_timesteps=3600
     )
 
     # PPO agent specification

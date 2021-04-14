@@ -119,7 +119,7 @@ if __name__ == '__main__':
             w_try = population[j] + w
             episode_rewards[j] = evaluate_individual(w_try, building, available_actions)
         
-        # Scale results based on standard score
+        # Calculate standard scores
         standard_score = (episode_rewards - np.mean(episode_rewards)) / np.std(episode_rewards)
         for j in range(s.POPULATION_SIZE):
             # Modify w proportional to individual's relative performance
