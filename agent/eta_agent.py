@@ -20,7 +20,7 @@ class ETAAgent(BenchmarkAgent):
             # Elevator moves towards call in direction of call or is idle
             if ((call_direction == elevator.direction or call_floor == 0 or call_floor == s.NUM_FLOORS-1) \
             and self._travelling_towards(call_floor, elevator)) \
-            or  (elevator.empty() and len(self.elevator_up_queues[idx]) == 0 and len(self.elevator_down_queues) == 0):
+            or  (elevator.empty() and len(self.elevator_up_queues[idx]) == 0 and len(self.elevator_down_queues[idx]) == 0):
                 available_elevators.append((idx, elevator))
         return available_elevators
 
@@ -35,8 +35,6 @@ class ETAAgent(BenchmarkAgent):
                 stops_between += f in elevator.buttons_pressed
                 stops_between += f in self.elevator_up_queues[elevator_idx]
         return stops_between+1
-
-            
 
     def _min_cost_elevator(self, call_floor, elevators):
         min_cost = float('inf')
