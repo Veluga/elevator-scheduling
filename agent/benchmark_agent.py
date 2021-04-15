@@ -94,7 +94,10 @@ class BenchmarkAgent(Agent, ABC):
         # Pick up passengers waiting in hall, serving oldest call (FCFS)
         oldest_call_up = self.elevator_up_queues[idx][0] if len(self.elevator_up_queues[idx]) > 0 else Call(0, float('-inf'))
         oldest_call_down = self.elevator_down_queues[idx][0] if len(self.elevator_down_queues[idx]) > 0 else Call(0, float('-inf'))
-        if elevator.cur_floor < (oldest_call_up.floor if oldest_call_up.t_wait > oldest_call_down.t_wait else oldest_call_down.floor):
+        oldest_call_floor = oldest_call_up.floor if oldest_call_up.t_wait > oldest_call_down.t_wait else oldest_call_down.floor
+        # Button press to serve hall call
+        elevator.buttons_pressed.add(oldest_call_floor)
+        if elevator.cur_floor < oldest_call_floor:
             return ElevatorState.ASCENDING
         else:
             return ElevatorState.DESCENDING
