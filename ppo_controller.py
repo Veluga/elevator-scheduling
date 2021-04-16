@@ -41,8 +41,7 @@ def main():
     # Initialize the runner
     runner = Runner(agent=agent, environment=environment, max_episode_timesteps=3600)
 
-    # Train for 200 episodes
-    runner.run(num_episodes=200)
+    runner.run(num_episodes=s.NUM_ITERATIONS)
     runner.close()
 
 
