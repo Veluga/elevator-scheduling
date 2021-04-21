@@ -3,6 +3,7 @@ import settings as s
 import random
 import pathlib
 import sys
+import pickle
 from enum import Enum
 
 class ANN:
@@ -82,6 +83,24 @@ class ANN:
         
         return res
 
+    def save_model(self, path, step):
+        with open(path + f"/ann_{step}", "wb") as out_file:
+            pickle.dump(self, out_file)
+
+    def restore_model_from_checkpoint(self, path, step):
+        with open(path + f"/ann_{step}", "rb") as model_file:
+            restored_ann = pickle.load(model_file)
+
+            self.input_layer = restored_ann.input_layer
+            for idx, hl in enumerate(restored_ann.hidden_layers):
+                self.hidden_layers[idx] = hl
+            self.output_layer = restored_ann.output_layer
+
+            assert np.all(self.input_layer == restored_ann.input_layer)
+            for idx, hl in enumerate(self.hidden_layers):
+                assert np.all(hl == restored_ann.hidden_layers[idx])
+            assert np.all(self.output_layer == restored_ann.output_layer)
+
 def evaluate_individual(individual, building, available_actions):
     """Gauge performance of individual ANN in building environment."""
     building.reset()
@@ -134,5 +153,5 @@ if __name__ == '__main__':
             sys.stdout.flush()
         
         if step > 0 and step % s.ES_POLICY_SAVER_INTERVAL == 0:
-            weights_dir = str(pathlib.Path(__file__).parent.absolute()) + "/weights/"
-            np.save(weights_dir + "policy_{}.npy".format(step), w)
+            weights_dir = str(pathlib.Path(__file__).parent.absolute()) + "/weights"
+            w.save_model(weights_dir, step)
