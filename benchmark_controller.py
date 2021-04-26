@@ -24,10 +24,9 @@ class Controller:
     """The Controller ties together the building (environment) and agent.
     Agents receive state samples to generate actions, which are passed to the building for state updates.
     """
-    def __init__(self, building, agent, visualization=None, timesteps=10000):
+    def __init__(self, building, agent, timesteps=10000):
         self.building = building
         self.agent = agent
-        self.visualization = visualization
         self.timesteps = timesteps
 
     def run(self):
@@ -38,14 +37,9 @@ class Controller:
             reward = self.building.perform_action(action)
             _, new_state = self.building.sample_state()
             agent.perform_update(state, action, reward, new_state)
-            if self.visualization:
-                # Pass reward to visualization
-                self.visualization.next_reward(reward)
             if t % int(sqrt(self.timesteps)) == 0:
                 # Progress "bar"
                 print("Time {}/{}".format(t, self.timesteps))
-        if self.visualization:
-            self.visualization.display()
 
 if __name__ == "__main__":
     random.seed(s.RANDOM_SEED)
@@ -57,17 +51,13 @@ if __name__ == "__main__":
 
     from agent.benchmark_agent import get_benchmark_agent
 
-    from visualization.average_reward import AverageReward
-    from visualization.cumulative_reward import CumulativeReward
-
 
     caller = get_caller()
     building = DiscreteFloorTransition(caller, track_passengers=True)
     available_actions = generate_available_actions()
     agent = get_benchmark_agent(available_actions)
-    viz = None
 
-    ctrl = Controller(building, agent, visualization=viz, timesteps=s.EPISODE_LENGTH)
+    ctrl = Controller(building, agent, timesteps=s.EPISODE_LENGTH)
     ctrl.run()
     print("Delivered passengers: {}%".format(
         len([p for p in ctrl.building.passengers.values() if p.served]) / len(ctrl.building.passengers.values()) * 100

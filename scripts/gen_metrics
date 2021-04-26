@@ -13,5 +13,5 @@ ABSOLUTE="$(pwd)/experiments/${LATEST}"
 AVAILABLE_METRICS=('loss' 'waiting_passengers' 'boarded_passengers' 'avg_return')
 
 for metric in "${AVAILABLE_METRICS[@]}"; do
-    cat experiments/"$LATEST"/model_log.txt | grep "$metric" | python visualization/save_metric_as_image.py "$ABSOLUTE" $metric
+    cat experiments/"$LATEST"/model_log.txt | grep "$metric" | python scripts/save_metric_as_image.py "$ABSOLUTE" $metric
 done

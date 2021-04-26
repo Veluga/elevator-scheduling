@@ -34,8 +34,5 @@ Call generating policies implemented include:
 * Controller
   * Ties together all moving parts of the system (i.e. agent, building (environment), caller)
   * For reinforcement learning agents, the controller implements the staple sample-act-sample-update loop
-* Visualization
-  * Allows metrics such as cumulative/average reward to be calculated and plotted after training
-  * Abstract class `Visualization` (`visualization/visualization.py`) describes interface controller can program against
 * `settings.py`
   * Contains global constants of the simulation environment and the learning agents (e.g. number of floors, number of elevators, etc.)

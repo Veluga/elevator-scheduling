@@ -9,4 +9,4 @@ if [[ -z "$1" ]]; then
 fi
 
 LATEST=$(ls -t experiments | head -n1)
-cat experiments/"$LATEST"/model_log.txt | grep "$1" | python visualization/show_metric.py "$1"
+cat experiments/"$LATEST"/model_log.txt | grep "$1" | python scripts/show_metric.py "$1"
