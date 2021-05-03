@@ -1,5 +1,5 @@
 from caller.get_caller import get_caller
-from building.tf_building import TFBuilding
+from building.tf_building import TensorflowAgentsBuilding
 from building.building import ElevatorState
 from building.discrete_floor_transition import DiscreteFloorTransition
 from benchmark_controller import generate_available_actions
@@ -19,7 +19,7 @@ available_actions = generate_available_actions()
 # Building initialization
 caller = get_caller()
 
-eval_py_building = TFBuilding(DiscreteFloorTransition(caller, track_passengers=True), available_actions)
+eval_py_building = TensorflowAgentsBuilding(DiscreteFloorTransition(caller, track_passengers=True), available_actions)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_building)
 
 # Restore policy

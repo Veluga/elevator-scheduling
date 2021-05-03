@@ -13,7 +13,7 @@ import numpy as np
 import settings as s
 
 
-class TFBuilding(py_environment.PyEnvironment):
+class TensorflowAgentsBuilding(py_environment.PyEnvironment):
     """Boilerplate code that wraps a building with a tf-agents compatible environment.
     See https://www.tensorflow.org/agents/api_docs/python/tf_agents/environments/py_environment/PyEnvironment
     for documentation and https://www.tensorflow.org/agents/tutorials/2_environments_tutorial for a tutorial.

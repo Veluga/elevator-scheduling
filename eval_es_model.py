@@ -1,6 +1,6 @@
 import settings as s
 from caller.get_caller import get_caller
-from building.tf_building import TFBuilding
+from building.tf_building import TensorflowAgentsBuilding
 from building.building import ElevatorState
 from building.discrete_floor_transition import DiscreteFloorTransition
 from benchmark_controller import generate_available_actions

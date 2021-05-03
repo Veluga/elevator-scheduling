@@ -1,4 +1,4 @@
-from building.tf_building import TFBuilding
+from building.tf_building import TensorflowAgentsBuilding
 from building.building import ElevatorState
 from building.discrete_floor_transition import DiscreteFloorTransition
 from caller.get_caller import get_caller
@@ -69,8 +69,8 @@ if __name__ == '__main__':
         
         # Building initialization
         caller = get_caller()
-        train_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions())
-        eval_py_building = TFBuilding(DiscreteFloorTransition(caller), generate_available_actions())
+        train_py_building = TensorflowAgentsBuilding(DiscreteFloorTransition(caller), generate_available_actions())
+        eval_py_building = TensorflowAgentsBuilding(DiscreteFloorTransition(caller), generate_available_actions())
         train_env = tf_py_environment.TFPyEnvironment(train_py_building)
         eval_env = tf_py_environment.TFPyEnvironment(eval_py_building)
 
